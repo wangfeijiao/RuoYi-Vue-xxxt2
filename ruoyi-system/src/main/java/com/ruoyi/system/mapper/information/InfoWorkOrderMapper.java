@@ -11,6 +11,8 @@ public interface InfoWorkOrderMapper
 
     List<InfoWorkOrder> selectRecentInfoWorkOrders(int limit);
 
+    int countResourceWorkOrdersBySubjectIds(Long[] subjectIds);
+
     int insertInfoWorkOrder(InfoWorkOrder workOrder);
 
     int updateInfoWorkOrder(InfoWorkOrder workOrder);

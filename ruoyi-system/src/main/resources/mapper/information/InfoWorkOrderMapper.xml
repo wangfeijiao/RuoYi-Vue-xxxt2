@@ -43,6 +43,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         limit #{limit}
     </select>
 
+    <select id="countResourceWorkOrdersBySubjectIds" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_work_order
+        where domain_type = 'RESOURCE'
+          and subject_id in
+        <foreach collection="array" item="subjectId" open="(" separator="," close=")">
+            #{subjectId}
+        </foreach>
+    </select>
+
     <insert id="insertInfoWorkOrder" parameterType="com.ruoyi.system.domain.information.InfoWorkOrder" useGeneratedKeys="true" keyProperty="workOrderId">
         insert into inf_work_order (
             work_order_no, domain_type, request_type, order_status, project_id, subject_id, subject_name, subject_type,

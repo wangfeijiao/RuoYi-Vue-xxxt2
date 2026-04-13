@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.information.impl;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,6 +11,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.information.InfoApproveBody;
 import com.ruoyi.system.domain.information.InfoExecuteBody;
 import com.ruoyi.system.domain.information.InfoResource;
@@ -48,8 +50,17 @@ public class InfoWorkOrderServiceImplTest
         InfoWorkOrder workOrder = new InfoWorkOrder();
         workOrder.setWorkOrderId(workOrderId);
         workOrder.setOrderStatus("PENDING");
+        workOrder.setDomainType("RESOURCE");
+        workOrder.setRequestType("CHANGE");
+        workOrder.setSubjectId(5L);
         when(workOrderMapper.selectInfoWorkOrderById(workOrderId)).thenReturn(workOrder);
         when(workOrderMapper.updateInfoWorkOrder(any(InfoWorkOrder.class))).thenReturn(1);
+
+        InfoResource resource = new InfoResource();
+        resource.setResourceId(5L);
+        resource.setResourceStatus("IN_USE");
+        when(resourceMapper.selectInfoResourceById(5L)).thenReturn(resource);
+        when(resourceMapper.updateInfoResource(any(InfoResource.class))).thenReturn(1);
 
         InfoApproveBody body = new InfoApproveBody();
         body.setApproved(Boolean.TRUE);
@@ -64,6 +75,10 @@ public class InfoWorkOrderServiceImplTest
         assertEquals("PENDING_EXECUTION", updated.getOrderStatus());
         assertEquals("manager", updated.getApproverName());
         assertEquals("approved", updated.getApprovalComment());
+
+        ArgumentCaptor<InfoResource> resourceCaptor = ArgumentCaptor.forClass(InfoResource.class);
+        verify(resourceMapper).updateInfoResource(resourceCaptor.capture());
+        assertEquals("CHANGING", resourceCaptor.getValue().getResourceStatus());
     }
 
     @Test
@@ -108,5 +123,18 @@ public class InfoWorkOrderServiceImplTest
         verify(resourceMapper).updateInfoResource(resourceCaptor.capture());
         assertEquals(resourceId, resourceCaptor.getValue().getResourceId());
         assertEquals("IN_USE", resourceCaptor.getValue().getResourceStatus());
+    }
+
+    @Test
+    public void shouldRejectResourceRecycleWithoutSubject()
+    {
+        InfoWorkOrder workOrder = new InfoWorkOrder();
+        workOrder.setDomainType("RESOURCE");
+        workOrder.setRequestType("RECYCLE");
+        workOrder.setRequestTitle("Recycle");
+        workOrder.setApplicantName("user1");
+        workOrder.setRequestReason("unused");
+
+        assertThrows(ServiceException.class, () -> service.insertInfoWorkOrder(workOrder));
     }
 }

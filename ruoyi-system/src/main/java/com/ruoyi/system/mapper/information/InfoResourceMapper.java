@@ -7,6 +7,10 @@ public interface InfoResourceMapper
 {
     InfoResource selectInfoResourceById(Long resourceId);
 
+    InfoResource selectInfoResourceByCode(String resourceCode);
+
+    InfoResource selectActiveInfoResourceByIpAddress(InfoResource resource);
+
     List<InfoResource> selectInfoResourceList(InfoResource resource);
 
     int insertInfoResource(InfoResource resource);

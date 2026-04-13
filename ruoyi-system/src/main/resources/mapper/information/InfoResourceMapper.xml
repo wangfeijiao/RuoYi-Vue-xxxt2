@@ -22,6 +22,21 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where r.resource_id = #{resourceId}
     </select>
 
+    <select id="selectInfoResourceByCode" parameterType="String" resultType="com.ruoyi.system.domain.information.InfoResource">
+        <include refid="selectResourceColumns"/>
+        where r.resource_code = #{resourceCode}
+    </select>
+
+    <select id="selectActiveInfoResourceByIpAddress" parameterType="com.ruoyi.system.domain.information.InfoResource" resultType="com.ruoyi.system.domain.information.InfoResource">
+        <include refid="selectResourceColumns"/>
+        where r.ip_address = #{ipAddress}
+          and r.resource_status != 'RECYCLED'
+          <if test="resourceId != null">
+            and r.resource_id != #{resourceId}
+          </if>
+        limit 1
+    </select>
+
     <select id="selectInfoResourceList" parameterType="com.ruoyi.system.domain.information.InfoResource" resultType="com.ruoyi.system.domain.information.InfoResource">
         <include refid="selectResourceColumns"/>
         <where>
@@ -29,8 +44,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="resourceName != null and resourceName != ''">and r.resource_name like concat('%', #{resourceName}, '%')</if>
             <if test="resourceType != null and resourceType != ''">and r.resource_type = #{resourceType}</if>
             <if test="resourceStatus != null and resourceStatus != ''">and r.resource_status = #{resourceStatus}</if>
+            <if test="monitorStatus != null and monitorStatus != ''">and r.monitor_status = #{monitorStatus}</if>
             <if test="projectId != null">and r.project_id = #{projectId}</if>
             <if test="ownerName != null and ownerName != ''">and r.owner_name like concat('%', #{ownerName}, '%')</if>
+            <if test="maintainerName != null and maintainerName != ''">and r.maintainer_name like concat('%', #{maintainerName}, '%')</if>
+            <if test="ipAddress != null and ipAddress != ''">and r.ip_address like concat('%', #{ipAddress}, '%')</if>
+            <if test="params.beginDeliveryTime != null and params.beginDeliveryTime != ''">and r.delivery_time &gt;= #{params.beginDeliveryTime}</if>
+            <if test="params.endDeliveryTime != null and params.endDeliveryTime != ''">and r.delivery_time &lt;= #{params.endDeliveryTime}</if>
         </where>
         order by r.resource_id desc
     </select>
