@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Open Multi-Agent R&D Team</title>
+    <meta
+      name="description"
+      content="一个面向企业研发流程的多 Agent 开源项目，覆盖产品、设计、架构、审批、实现、评审、安全、测试与发布。"
+    />
+    <style>
+      :root {
+        --bg: #f4efe7;
+        --bg-strong: #e8dece;
+        --paper: rgba(255, 251, 245, 0.85);
+        --paper-solid: #fffaf3;
+        --ink: #1f1a17;
+        --muted: #6f6358;
+        --line: rgba(31, 26, 23, 0.12);
+        --accent: #c55b35;
+        --accent-deep: #8d3518;
+        --accent-soft: #f4d7c8;
+        --ok: #1d6b52;
+        --warn: #8d5a18;
+        --shadow: 0 24px 70px rgba(92, 65, 42, 0.14);
+        --radius-xl: 32px;
+        --radius-lg: 24px;
+        --radius-md: 18px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        font-family: "Avenir Next", "PingFang SC", "Microsoft YaHei", sans-serif;
+        background:
+          radial-gradient(circle at top left, rgba(197, 91, 53, 0.16), transparent 30%),
+          radial-gradient(circle at right 15%, rgba(29, 107, 82, 0.14), transparent 26%),
+          linear-gradient(135deg, #f6f0e8 0%, #efe4d6 52%, #e8ddcf 100%);
+      }
+
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+
+      .page {
+        width: min(1200px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 20px 0 56px;
+      }
+
+      .nav,
+      .hero,
+      .panel,
+      .workflow,
+      .footer {
+        background: var(--paper);
+        border: 1px solid rgba(255, 255, 255, 0.58);
+        backdrop-filter: blur(14px);
+        box-shadow: var(--shadow);
+      }
+
+      .nav {
+        position: sticky;
+        top: 16px;
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding: 14px 18px;
+        border-radius: 999px;
+      }
+
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .badge {
+        display: grid;
+        place-items: center;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--accent), #e7a176);
+        color: #fff;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+      }
+
+      .brand-text strong,
+      .section-head strong {
+        display: block;
+        font-size: 15px;
+        letter-spacing: 0.02em;
+      }
+
+      .brand-text span,
+      .section-head span,
+      .meta,
+      .card p,
+      .flow-card p,
+      .footer p {
+        color: var(--muted);
+      }
+
+      .nav-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .nav-links a,
+      .chip,
+      .file-link {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--line);
+        background: rgba(255, 255, 255, 0.62);
+        transition:
+          transform 140ms ease,
+          border-color 140ms ease,
+          background 140ms ease;
+      }
+
+      .nav-links a:hover,
+      .chip:hover,
+      .file-link:hover,
+      .cta:hover {
+        transform: translateY(-1px);
+      }
+
+      .hero {
+        margin-top: 20px;
+        padding: 34px;
+        border-radius: var(--radius-xl);
+        display: grid;
+        grid-template-columns: minmax(0, 1.2fr) minmax(320px, 0.8fr);
+        gap: 24px;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(197, 91, 53, 0.2);
+        background: rgba(244, 215, 200, 0.55);
+        color: var(--accent-deep);
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      h3 {
+        margin: 0;
+      }
+
+      h1 {
+        margin-top: 18px;
+        font-size: clamp(44px, 6vw, 76px);
+        line-height: 0.95;
+        max-width: 11ch;
+      }
+
+      .lead {
+        margin: 18px 0 0;
+        max-width: 62ch;
+        line-height: 1.7;
+        color: var(--muted);
+        font-size: 17px;
+      }
+
+      .cta-row,
+      .chip-row,
+      .stats,
+      .grid,
+      .flow-grid,
+      .repo-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+      }
+
+      .cta-row {
+        margin-top: 24px;
+      }
+
+      .cta {
+        padding: 14px 18px;
+        border-radius: 999px;
+        border: 1px solid transparent;
+        font-weight: 700;
+        transition:
+          transform 140ms ease,
+          box-shadow 140ms ease,
+          background 140ms ease;
+      }
+
+      .cta.primary {
+        background: linear-gradient(135deg, #211c19, #5b4539);
+        color: #fff;
+        box-shadow: 0 12px 24px rgba(31, 26, 23, 0.14);
+      }
+
+      .cta.secondary {
+        background: rgba(255, 255, 255, 0.66);
+        border-color: var(--line);
+      }
+
+      .stats {
+        margin-top: 28px;
+      }
+
+      .stat {
+        min-width: 138px;
+        padding: 16px;
+        border-radius: var(--radius-md);
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid var(--line);
+      }
+
+      .stat strong {
+        display: block;
+        font-size: 28px;
+      }
+
+      .meta {
+        font-size: 14px;
+        line-height: 1.6;
+      }
+
+      .hero-side {
+        display: grid;
+        gap: 14px;
+      }
+
+      .panel {
+        padding: 22px;
+        border-radius: var(--radius-lg);
+      }
+
+      .panel code,
+      .flow-card code,
+      .repo-box code {
+        font-family: "SFMono-Regular", "SFMono-Regular", Consolas, monospace;
+        font-size: 13px;
+      }
+
+      .panel ul,
+      .flow-card ul {
+        margin: 14px 0 0;
+        padding-left: 18px;
+        color: var(--muted);
+        line-height: 1.8;
+      }
+
+      .section {
+        margin-top: 22px;
+      }
+
+      .section-head {
+        margin-bottom: 14px;
+      }
+
+      .section-head strong {
+        font-size: clamp(28px, 4vw, 38px);
+        line-height: 1.08;
+      }
+
+      .section-head span {
+        display: block;
+        margin-top: 8px;
+        max-width: 62ch;
+        line-height: 1.7;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .card {
+        padding: 22px;
+        border-radius: var(--radius-lg);
+        background: var(--paper-solid);
+        border: 1px solid var(--line);
+        min-height: 220px;
+      }
+
+      .card h3 {
+        font-size: 22px;
+      }
+
+      .card p {
+        margin: 10px 0 0;
+        line-height: 1.7;
+      }
+
+      .chip-row {
+        margin-top: 16px;
+      }
+
+      .chip {
+        font-size: 13px;
+        color: var(--accent-deep);
+        background: var(--accent-soft);
+        border-color: rgba(197, 91, 53, 0.14);
+      }
+
+      .workflow {
+        margin-top: 22px;
+        padding: 26px;
+        border-radius: var(--radius-xl);
+      }
+
+      .flow-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 14px;
+      }
+
+      .flow-card {
+        padding: 20px;
+        border-radius: var(--radius-lg);
+        background: rgba(255, 255, 255, 0.68);
+        border: 1px solid var(--line);
+      }
+
+      .flow-card strong {
+        display: block;
+        margin-bottom: 8px;
+        font-size: 18px;
+      }
+
+      .flow-card .step {
+        display: inline-flex;
+        padding: 6px 10px;
+        border-radius: 999px;
+        background: #211c19;
+        color: #fff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+      }
+
+      .repo-box {
+        margin-top: 22px;
+        padding: 24px;
+        border-radius: var(--radius-xl);
+        background: linear-gradient(135deg, rgba(255, 250, 243, 0.9), rgba(243, 230, 217, 0.92));
+        border: 1px solid var(--line);
+      }
+
+      .repo-links {
+        margin-top: 16px;
+      }
+
+      .file-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .footer {
+        margin-top: 22px;
+        padding: 22px;
+        border-radius: var(--radius-xl);
+      }
+
+      .footer p {
+        margin: 0;
+        line-height: 1.7;
+      }
+
+      @media (max-width: 1080px) {
+        .hero,
+        .grid,
+        .flow-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 760px) {
+        .page {
+          width: min(100% - 20px, 1200px);
+          padding-top: 12px;
+        }
+
+        .nav {
+          position: static;
+          border-radius: 28px;
+          padding: 16px;
+          align-items: flex-start;
+          flex-direction: column;
+        }
+
+        .hero,
+        .grid,
+        .flow-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .hero,
+        .workflow,
+        .panel,
+        .repo-box,
+        .footer {
+          padding: 20px;
+        }
+
+        h1 {
+          max-width: none;
+          font-size: 42px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <nav class="nav">
+        <div class="brand">
+          <div class="badge">MA</div>
+          <div class="brand-text">
+            <strong>Open Multi-Agent R&D Team</strong>
+            <span>企业级研发协作的开源角色矩阵</span>
+          </div>
+        </div>
+        <div class="nav-links">
+          <a href="#roles">角色矩阵</a>
+          <a href="#workflow">协作流程</a>
+          <a href="#repo">仓库内容</a>
+        </div>
+      </nav>
+
+      <section class="hero">
+        <div>
+          <div class="eyebrow">Artifact First · Gate Before Build</div>
+          <h1>多 Agent 团队配置</h1>
+          <p class="lead">
+            这个仓库不是单个 Agent prompt 的集合，而是一套完整的研发组织协议。它将产品、设计、架构、审批、实现、评审、安全、测试、发布拆成明确角色，并用统一
+            artifact 和 gate 规则保证每一步都可追溯、可审查、可交接。
+          </p>
+          <div class="cta-row">
+            <a class="cta primary" href="./README.md">阅读 README</a>
+            <a class="cta secondary" href="./AGENTS.md">查看执行规约</a>
+          </div>
+          <div class="stats">
+            <div class="stat">
+              <strong>12</strong>
+              <span class="meta">内置角色</span>
+            </div>
+            <div class="stat">
+              <strong>16+</strong>
+              <span class="meta">标准 artifact</span>
+            </div>
+            <div class="stat">
+              <strong>8</strong>
+              <span class="meta">研发阶段</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-side">
+          <div class="panel">
+            <div class="section-head">
+              <strong>项目定位</strong>
+              <span>为企业软件与 AI 功能交付提供一套可执行的多 Agent 研发运行规范。</span>
+            </div>
+            <ul>
+              <li>统一产物：使用固定 artifact 标签管理交付</li>
+              <li>明确门禁：未满足输入不得越级进入实现</li>
+              <li>职责边界：关键决策只能由唯一角色负责</li>
+              <li>可追溯性：每段实现都可回溯到需求与设计依据</li>
+            </ul>
+          </div>
+
+          <div class="panel">
+            <div class="section-head">
+              <strong>当前仓库包含</strong>
+              <span>项目基本结构。</span>
+            </div>
+            <ul>
+              <li><code>AGENTS.md</code> 多 Agent 协议总规约</li>
+              <li><code>.codex/agents/*.toml</code> 各角色配置</li>
+              <li><code>docs/</code> 角色目录与模板文档</li>
+              <li><code>README.md</code> 项目说明与使用方式</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="roles">
+        <div class="section-head">
+          <strong>角色矩阵</strong>
+          <span>围绕标准研发链路构建角色，而不是围绕单次提示词堆叠能力。</span>
+        </div>
+
+        <div class="grid">
+          <article class="card">
+            <h3>Product</h3>
+            <p>由 <code>senior-ai-agent-pm</code> 负责 PRD、User Story、Prototype，确保目标、范围、验收标准先于实现存在。</p>
+            <div class="chip-row">
+              <span class="chip">PRD</span>
+              <span class="chip">UserStory</span>
+              <span class="chip">Prototype</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Design</h3>
+            <p>由 <code>senior-ui-designer</code> 负责 DesignSpec、UICode、InteractionSpec，避免进入实现后再反向补设计。</p>
+            <div class="chip-row">
+              <span class="chip">DesignSpec</span>
+              <span class="chip">UICode</span>
+              <span class="chip">InteractionSpec</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Architecture</h3>
+            <p>由 <code>tech-lead-architect</code> 输出 SystemArch、DBDesign、APIDoc、TaskBreakdown，把实现所需契约一次性定义清楚。</p>
+            <div class="chip-row">
+              <span class="chip">SystemArch</span>
+              <span class="chip">DBDesign</span>
+              <span class="chip">APIDoc</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Approval</h3>
+            <p>由 <code>engineering-manager</code> 承担唯一编码门禁，审批不通过时，前后端与 AI 实现角色全部必须阻塞。</p>
+            <div class="chip-row">
+              <span class="chip">Approval</span>
+              <span class="chip">Gate</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Implementation</h3>
+            <p>前端、后端、AI 工程角色分别执行，实现前必须先产出 <code>ImplementationPlan</code>，而不是直接改代码。</p>
+            <div class="chip-row">
+              <span class="chip">FrontendCode</span>
+              <span class="chip">BackendCode</span>
+              <span class="chip">AICode</span>
+            </div>
+          </article>
+
+          <article class="card">
+            <h3>Quality</h3>
+            <p><code>code-reviewer</code>、<code>security-engineer</code>、<code>senior-qa-engineer</code> 和 <code>devops-engineer</code> 共同完成上线前闭环。</p>
+            <div class="chip-row">
+              <span class="chip">Review</span>
+              <span class="chip">Security</span>
+              <span class="chip">QA</span>
+              <span class="chip">Release</span>
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section class="workflow" id="workflow">
+        <div class="section-head">
+          <strong>协作流程</strong>
+          <span>每个阶段只有在入口条件满足时才能进入下一步，否则按 BLOCKED 模板回退给上游。</span>
+        </div>
+
+        <div class="flow-grid">
+          <article class="flow-card">
+            <span class="step">01</span>
+            <strong>Product</strong>
+            <p>需求澄清后输出 <code>PRD</code>、<code>UserStory</code>、<code>Prototype</code>。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">02</span>
+            <strong>Design & Arch</strong>
+            <p>设计与架构角色补齐 UI 规范、接口契约、任务拆解与系统边界。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">03</span>
+            <strong>Approval</strong>
+            <p>工程经理基于完整输入决定 <code>APPROVED</code> 或 <code>REJECTED</code>。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">04</span>
+            <strong>Implement</strong>
+            <p>实现角色先写计划，再交付前端、后端或 AI 代码产物。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">05</span>
+            <strong>Review</strong>
+            <p>代码评审和系统评审识别 blocker、high、medium、low 风险。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">06</span>
+            <strong>Security</strong>
+            <p>安全角色审查权限、依赖、输入校验与暴露面。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">07</span>
+            <strong>QA</strong>
+            <p>测试角色输出用例与测试报告，确认关键路径和异常流。</p>
+          </article>
+          <article class="flow-card">
+            <span class="step">08</span>
+            <strong>Release</strong>
+            <p>DevOps 在质量门禁通过后给出部署、回滚和监控方案。</p>
+          </article>
+        </div>
+      </section>
+
+      <section class="repo-box" id="repo">
+        <div class="section-head">
+          <strong>仓库内容</strong>
+          <span>这个目录已经具备作为 GitHub 开源仓库的基础信息架构。</span>
+        </div>
+        <div class="repo-links">
+          <a class="file-link" href="./README.md"><code>README.md</code> 项目说明</a>
+          <a class="file-link" href="./CONTRIBUTING.md"><code>CONTRIBUTING.md</code> 贡献指南</a>
+          <a class="file-link" href="./LICENSE"><code>LICENSE</code> 开源许可证</a>
+          <a class="file-link" href="./docs/agent-catalog.md"><code>docs/agent-catalog.md</code> 角色目录</a>
+          <a class="file-link" href="./docs/artifact-templates.md"><code>docs/artifact-templates.md</code> 模板清单</a>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
