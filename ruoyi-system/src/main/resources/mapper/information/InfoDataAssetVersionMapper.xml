@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoDataAssetVersionMapper">
+
+    <select id="selectInfoDataAssetVersionList" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoDataAssetVersion">
+        select version_id as versionId, asset_id as assetId, version_no as versionNo, change_type as changeType,
+               snapshot_json as snapshotJson, change_reason as changeReason, changed_by as changedBy, changed_time as changedTime
+        from inf_data_asset_version
+        where asset_id = #{assetId}
+        order by changed_time desc
+    </select>
+
+    <insert id="insertInfoDataAssetVersion" parameterType="com.ruoyi.system.domain.information.InfoDataAssetVersion" useGeneratedKeys="true" keyProperty="versionId">
+        insert into inf_data_asset_version (
+            asset_id, version_no, change_type, snapshot_json, change_reason, changed_by, changed_time
+        ) values (
+            #{assetId}, #{versionNo}, #{changeType}, #{snapshotJson}, #{changeReason}, #{changedBy}, #{changedTime}
+        )
+    </insert>
+</mapper>

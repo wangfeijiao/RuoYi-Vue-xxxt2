@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoDashboardMapper">
+    <select id="selectProjectTotal" resultType="Long">
+        select count(1) from inf_project
+    </select>
+    <select id="selectProjectPendingAcceptance" resultType="Long">
+        select count(1) from inf_project where acceptance_status = 'PENDING'
+    </select>
+    <select id="selectResourceTotal" resultType="Long">
+        select count(1) from inf_resource
+    </select>
+    <select id="selectResourceInUse" resultType="Long">
+        select count(1) from inf_resource where resource_status = 'IN_USE'
+    </select>
+    <select id="selectApplicationTotal" resultType="Long">
+        select count(1) from inf_application
+    </select>
+    <select id="selectApplicationAlertCount" resultType="Long">
+        select count(1) from inf_application where application_status = 'ALERT'
+    </select>
+    <select id="selectDataAssetTotal" resultType="Long">
+        select count(1) from inf_data_asset
+    </select>
+    <select id="selectPendingDataOrders" resultType="Long">
+        select count(1) from inf_work_order where domain_type = 'DATA_ASSET' and order_status = 'PENDING'
+    </select>
+    <select id="selectNetworkTotal" resultType="Long">
+        select count(1) from inf_network_resource
+    </select>
+    <select id="selectPendingExecutionOrders" resultType="Long">
+        select count(1) from inf_work_order where order_status = 'PENDING_EXECUTION'
+    </select>
+    <select id="selectTodoOrders" resultType="Long">
+        select count(1) from inf_work_order where order_status in ('PENDING', 'PENDING_EXECUTION')
+    </select>
+</mapper>

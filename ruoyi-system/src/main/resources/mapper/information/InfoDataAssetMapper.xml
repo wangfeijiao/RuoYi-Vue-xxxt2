@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoDataAssetMapper">
+
+    <sql id="selectDataAssetColumns">
+        select asset_id as assetId, asset_code as assetCode, asset_name as assetName, business_domain as businessDomain,
+               asset_type as assetType, asset_status as assetStatus, security_level as securityLevel, source_system as sourceSystem,
+               data_format as dataFormat, schema_desc as schemaDesc, dictionary_desc as dictionaryDesc,
+               update_frequency as updateFrequency, data_volume as dataVolume, storage_location as storageLocation,
+               share_mode as shareMode, share_condition as shareCondition, owner_dept_name as ownerDeptName,
+               owner_name as ownerName, contact_phone as contactPhone, tag_names as tagNames,
+               lineage_desc as lineageDesc, quality_rule_desc as qualityRuleDesc,
+               create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark
+        from inf_data_asset
+    </sql>
+
+    <select id="selectInfoDataAssetById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoDataAsset">
+        <include refid="selectDataAssetColumns"/>
+        where asset_id = #{assetId}
+    </select>
+
+    <select id="selectInfoDataAssetList" parameterType="com.ruoyi.system.domain.information.InfoDataAsset" resultType="com.ruoyi.system.domain.information.InfoDataAsset">
+        <include refid="selectDataAssetColumns"/>
+        <where>
+            <if test="assetCode != null and assetCode != ''">and asset_code like concat('%', #{assetCode}, '%')</if>
+            <if test="assetName != null and assetName != ''">and asset_name like concat('%', #{assetName}, '%')</if>
+            <if test="businessDomain != null and businessDomain != ''">and business_domain = #{businessDomain}</if>
+            <if test="assetStatus != null and assetStatus != ''">and asset_status = #{assetStatus}</if>
+            <if test="securityLevel != null and securityLevel != ''">and security_level = #{securityLevel}</if>
+        </where>
+        order by asset_id desc
+    </select>
+
+    <insert id="insertInfoDataAsset" parameterType="com.ruoyi.system.domain.information.InfoDataAsset" useGeneratedKeys="true" keyProperty="assetId">
+        insert into inf_data_asset (
+            asset_code, asset_name, business_domain, asset_type, asset_status, security_level, source_system, data_format,
+            schema_desc, dictionary_desc, update_frequency, data_volume, storage_location, share_mode, share_condition,
+            owner_dept_name, owner_name, contact_phone, tag_names, lineage_desc, quality_rule_desc, create_by, create_time, remark
+        ) values (
+            #{assetCode}, #{assetName}, #{businessDomain}, #{assetType}, #{assetStatus}, #{securityLevel}, #{sourceSystem}, #{dataFormat},
+            #{schemaDesc}, #{dictionaryDesc}, #{updateFrequency}, #{dataVolume}, #{storageLocation}, #{shareMode}, #{shareCondition},
+            #{ownerDeptName}, #{ownerName}, #{contactPhone}, #{tagNames}, #{lineageDesc}, #{qualityRuleDesc}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoDataAsset" parameterType="com.ruoyi.system.domain.information.InfoDataAsset">
+        update inf_data_asset
+        <set>
+            <if test="assetCode != null">asset_code = #{assetCode},</if>
+            <if test="assetName != null">asset_name = #{assetName},</if>
+            <if test="businessDomain != null">business_domain = #{businessDomain},</if>
+            <if test="assetType != null">asset_type = #{assetType},</if>
+            <if test="assetStatus != null">asset_status = #{assetStatus},</if>
+            <if test="securityLevel != null">security_level = #{securityLevel},</if>
+            <if test="sourceSystem != null">source_system = #{sourceSystem},</if>
+            <if test="dataFormat != null">data_format = #{dataFormat},</if>
+            <if test="schemaDesc != null">schema_desc = #{schemaDesc},</if>
+            <if test="dictionaryDesc != null">dictionary_desc = #{dictionaryDesc},</if>
+            <if test="updateFrequency != null">update_frequency = #{updateFrequency},</if>
+            <if test="dataVolume != null">data_volume = #{dataVolume},</if>
+            <if test="storageLocation != null">storage_location = #{storageLocation},</if>
+            <if test="shareMode != null">share_mode = #{shareMode},</if>
+            <if test="shareCondition != null">share_condition = #{shareCondition},</if>
+            <if test="ownerDeptName != null">owner_dept_name = #{ownerDeptName},</if>
+            <if test="ownerName != null">owner_name = #{ownerName},</if>
+            <if test="contactPhone != null">contact_phone = #{contactPhone},</if>
+            <if test="tagNames != null">tag_names = #{tagNames},</if>
+            <if test="lineageDesc != null">lineage_desc = #{lineageDesc},</if>
+            <if test="qualityRuleDesc != null">quality_rule_desc = #{qualityRuleDesc},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where asset_id = #{assetId}
+    </update>
+
+    <delete id="deleteInfoDataAssetById" parameterType="Long">
+        delete from inf_data_asset where asset_id = #{assetId}
+    </delete>
+
+    <delete id="deleteInfoDataAssetByIds" parameterType="Long">
+        delete from inf_data_asset where asset_id in
+        <foreach collection="array" item="assetId" open="(" separator="," close=")">
+            #{assetId}
+        </foreach>
+    </delete>
+</mapper>

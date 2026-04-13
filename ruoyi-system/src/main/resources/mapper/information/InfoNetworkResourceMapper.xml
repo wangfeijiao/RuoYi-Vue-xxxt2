@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoNetworkResourceMapper">
+
+    <sql id="selectNetworkColumns">
+        select n.network_id as networkId, n.network_code as networkCode, n.network_name as networkName,
+               n.resource_type as resourceType, n.resource_status as resourceStatus, n.security_status as securityStatus,
+               n.project_id as projectId, p.project_name as projectName, n.owner_name as ownerName,
+               n.ip_segment as ipSegment, n.ip_count as ipCount, n.vlan_no as vlanNo,
+               n.bandwidth_mbps as bandwidthMbps, n.device_name as deviceName, n.device_type as deviceType,
+               n.rule_summary as ruleSummary, n.access_policy as accessPolicy, n.topology_doc as topologyDoc,
+               n.allocation_doc as allocationDoc, n.monitor_summary as monitorSummary,
+               n.create_by as createBy, n.create_time as createTime, n.update_by as updateBy, n.update_time as updateTime, n.remark
+        from inf_network_resource n
+        left join inf_project p on n.project_id = p.project_id
+    </sql>
+
+    <select id="selectInfoNetworkResourceById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoNetworkResource">
+        <include refid="selectNetworkColumns"/>
+        where n.network_id = #{networkId}
+    </select>
+
+    <select id="selectInfoNetworkResourceList" parameterType="com.ruoyi.system.domain.information.InfoNetworkResource" resultType="com.ruoyi.system.domain.information.InfoNetworkResource">
+        <include refid="selectNetworkColumns"/>
+        <where>
+            <if test="networkCode != null and networkCode != ''">and n.network_code like concat('%', #{networkCode}, '%')</if>
+            <if test="networkName != null and networkName != ''">and n.network_name like concat('%', #{networkName}, '%')</if>
+            <if test="resourceType != null and resourceType != ''">and n.resource_type = #{resourceType}</if>
+            <if test="resourceStatus != null and resourceStatus != ''">and n.resource_status = #{resourceStatus}</if>
+            <if test="securityStatus != null and securityStatus != ''">and n.security_status = #{securityStatus}</if>
+        </where>
+        order by n.network_id desc
+    </select>
+
+    <insert id="insertInfoNetworkResource" parameterType="com.ruoyi.system.domain.information.InfoNetworkResource" useGeneratedKeys="true" keyProperty="networkId">
+        insert into inf_network_resource (
+            network_code, network_name, resource_type, resource_status, security_status, project_id, owner_name,
+            ip_segment, ip_count, vlan_no, bandwidth_mbps, device_name, device_type, rule_summary, access_policy,
+            topology_doc, allocation_doc, monitor_summary, create_by, create_time, remark
+        ) values (
+            #{networkCode}, #{networkName}, #{resourceType}, #{resourceStatus}, #{securityStatus}, #{projectId}, #{ownerName},
+            #{ipSegment}, #{ipCount}, #{vlanNo}, #{bandwidthMbps}, #{deviceName}, #{deviceType}, #{ruleSummary}, #{accessPolicy},
+            #{topologyDoc}, #{allocationDoc}, #{monitorSummary}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoNetworkResource" parameterType="com.ruoyi.system.domain.information.InfoNetworkResource">
+        update inf_network_resource
+        <set>
+            <if test="networkCode != null">network_code = #{networkCode},</if>
+            <if test="networkName != null">network_name = #{networkName},</if>
+            <if test="resourceType != null">resource_type = #{resourceType},</if>
+            <if test="resourceStatus != null">resource_status = #{resourceStatus},</if>
+            <if test="securityStatus != null">security_status = #{securityStatus},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="ownerName != null">owner_name = #{ownerName},</if>
+            <if test="ipSegment != null">ip_segment = #{ipSegment},</if>
+            <if test="ipCount != null">ip_count = #{ipCount},</if>
+            <if test="vlanNo != null">vlan_no = #{vlanNo},</if>
+            <if test="bandwidthMbps != null">bandwidth_mbps = #{bandwidthMbps},</if>
+            <if test="deviceName != null">device_name = #{deviceName},</if>
+            <if test="deviceType != null">device_type = #{deviceType},</if>
+            <if test="ruleSummary != null">rule_summary = #{ruleSummary},</if>
+            <if test="accessPolicy != null">access_policy = #{accessPolicy},</if>
+            <if test="topologyDoc != null">topology_doc = #{topologyDoc},</if>
+            <if test="allocationDoc != null">allocation_doc = #{allocationDoc},</if>
+            <if test="monitorSummary != null">monitor_summary = #{monitorSummary},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where network_id = #{networkId}
+    </update>
+
+    <delete id="deleteInfoNetworkResourceById" parameterType="Long">
+        delete from inf_network_resource where network_id = #{networkId}
+    </delete>
+
+    <delete id="deleteInfoNetworkResourceByIds" parameterType="Long">
+        delete from inf_network_resource where network_id in
+        <foreach collection="array" item="networkId" open="(" separator="," close=")">
+            #{networkId}
+        </foreach>
+    </delete>
+</mapper>

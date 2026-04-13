@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoApplicationMapper">
+
+    <sql id="selectApplicationColumns">
+        select a.application_id as applicationId, a.application_code as applicationCode, a.application_name as applicationName,
+               a.application_type as applicationType, a.classification_level as classificationLevel, a.application_status as applicationStatus,
+               a.project_id as projectId, p.project_name as projectName, a.owner_org as ownerOrg, a.owner_name as ownerName,
+               a.vendor_name as vendorName, a.vendor_owner as vendorOwner, a.portal_owner as portalOwner,
+               a.resource_owner as resourceOwner, a.data_owner as dataOwner, a.security_owner as securityOwner,
+               a.access_url as accessUrl, a.tech_stack as techStack, a.resource_summary as resourceSummary,
+               a.network_summary as networkSummary, a.relation_summary as relationSummary,
+               a.create_by as createBy, a.create_time as createTime, a.update_by as updateBy, a.update_time as updateTime, a.remark
+        from inf_application a
+        left join inf_project p on a.project_id = p.project_id
+    </sql>
+
+    <select id="selectInfoApplicationById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplication">
+        <include refid="selectApplicationColumns"/>
+        where a.application_id = #{applicationId}
+    </select>
+
+    <select id="selectInfoApplicationList" parameterType="com.ruoyi.system.domain.information.InfoApplication" resultType="com.ruoyi.system.domain.information.InfoApplication">
+        <include refid="selectApplicationColumns"/>
+        <where>
+            <if test="applicationCode != null and applicationCode != ''">and a.application_code like concat('%', #{applicationCode}, '%')</if>
+            <if test="applicationName != null and applicationName != ''">and a.application_name like concat('%', #{applicationName}, '%')</if>
+            <if test="applicationType != null and applicationType != ''">and a.application_type = #{applicationType}</if>
+            <if test="classificationLevel != null and classificationLevel != ''">and a.classification_level = #{classificationLevel}</if>
+            <if test="applicationStatus != null and applicationStatus != ''">and a.application_status = #{applicationStatus}</if>
+        </where>
+        order by a.application_id desc
+    </select>
+
+    <insert id="insertInfoApplication" parameterType="com.ruoyi.system.domain.information.InfoApplication" useGeneratedKeys="true" keyProperty="applicationId">
+        insert into inf_application (
+            application_code, application_name, application_type, classification_level, application_status, project_id, owner_org,
+            owner_name, vendor_name, vendor_owner, portal_owner, resource_owner, data_owner, security_owner, access_url,
+            tech_stack, resource_summary, network_summary, relation_summary, create_by, create_time, remark
+        ) values (
+            #{applicationCode}, #{applicationName}, #{applicationType}, #{classificationLevel}, #{applicationStatus}, #{projectId}, #{ownerOrg},
+            #{ownerName}, #{vendorName}, #{vendorOwner}, #{portalOwner}, #{resourceOwner}, #{dataOwner}, #{securityOwner}, #{accessUrl},
+            #{techStack}, #{resourceSummary}, #{networkSummary}, #{relationSummary}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoApplication" parameterType="com.ruoyi.system.domain.information.InfoApplication">
+        update inf_application
+        <set>
+            <if test="applicationCode != null">application_code = #{applicationCode},</if>
+            <if test="applicationName != null">application_name = #{applicationName},</if>
+            <if test="applicationType != null">application_type = #{applicationType},</if>
+            <if test="classificationLevel != null">classification_level = #{classificationLevel},</if>
+            <if test="applicationStatus != null">application_status = #{applicationStatus},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="ownerOrg != null">owner_org = #{ownerOrg},</if>
+            <if test="ownerName != null">owner_name = #{ownerName},</if>
+            <if test="vendorName != null">vendor_name = #{vendorName},</if>
+            <if test="vendorOwner != null">vendor_owner = #{vendorOwner},</if>
+            <if test="portalOwner != null">portal_owner = #{portalOwner},</if>
+            <if test="resourceOwner != null">resource_owner = #{resourceOwner},</if>
+            <if test="dataOwner != null">data_owner = #{dataOwner},</if>
+            <if test="securityOwner != null">security_owner = #{securityOwner},</if>
+            <if test="accessUrl != null">access_url = #{accessUrl},</if>
+            <if test="techStack != null">tech_stack = #{techStack},</if>
+            <if test="resourceSummary != null">resource_summary = #{resourceSummary},</if>
+            <if test="networkSummary != null">network_summary = #{networkSummary},</if>
+            <if test="relationSummary != null">relation_summary = #{relationSummary},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where application_id = #{applicationId}
+    </update>
+
+    <delete id="deleteInfoApplicationById" parameterType="Long">
+        delete from inf_application where application_id = #{applicationId}
+    </delete>
+
+    <delete id="deleteInfoApplicationByIds" parameterType="Long">
+        delete from inf_application where application_id in
+        <foreach collection="array" item="applicationId" open="(" separator="," close=")">
+            #{applicationId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoWorkOrderMapper">
+
+    <sql id="selectWorkOrderColumns">
+        select w.work_order_id as workOrderId, w.work_order_no as workOrderNo, w.domain_type as domainType,
+               w.request_type as requestType, w.order_status as orderStatus, w.project_id as projectId,
+               p.project_name as projectName, w.subject_id as subjectId, w.subject_name as subjectName,
+               w.subject_type as subjectType, w.applicant_dept_id as applicantDeptId, w.applicant_name as applicantName,
+               w.approver_name as approverName, w.executor_name as executorName, w.request_title as requestTitle,
+               w.request_reason as requestReason, w.current_snapshot_json as currentSnapshotJson,
+               w.request_payload_json as requestPayloadJson, w.approval_comment as approvalComment,
+               w.execution_result as executionResult, w.expect_finish_time as expectFinishTime,
+               w.submitted_time as submittedTime, w.approved_time as approvedTime, w.executed_time as executedTime,
+               w.create_by as createBy, w.create_time as createTime, w.update_by as updateBy, w.update_time as updateTime, w.remark
+        from inf_work_order w
+        left join inf_project p on w.project_id = p.project_id
+    </sql>
+
+    <select id="selectInfoWorkOrderById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoWorkOrder">
+        <include refid="selectWorkOrderColumns"/>
+        where w.work_order_id = #{workOrderId}
+    </select>
+
+    <select id="selectInfoWorkOrderList" parameterType="com.ruoyi.system.domain.information.InfoWorkOrder" resultType="com.ruoyi.system.domain.information.InfoWorkOrder">
+        <include refid="selectWorkOrderColumns"/>
+        <where>
+            <if test="domainType != null and domainType != ''">and w.domain_type = #{domainType}</if>
+            <if test="requestType != null and requestType != ''">and w.request_type = #{requestType}</if>
+            <if test="orderStatus != null and orderStatus != ''">and w.order_status = #{orderStatus}</if>
+            <if test="projectId != null">and w.project_id = #{projectId}</if>
+            <if test="subjectName != null and subjectName != ''">and w.subject_name like concat('%', #{subjectName}, '%')</if>
+            <if test="applicantName != null and applicantName != ''">and w.applicant_name like concat('%', #{applicantName}, '%')</if>
+        </where>
+        order by w.work_order_id desc
+    </select>
+
+    <select id="selectRecentInfoWorkOrders" resultType="com.ruoyi.system.domain.information.InfoWorkOrder">
+        <include refid="selectWorkOrderColumns"/>
+        order by w.work_order_id desc
+        limit #{limit}
+    </select>
+
+    <insert id="insertInfoWorkOrder" parameterType="com.ruoyi.system.domain.information.InfoWorkOrder" useGeneratedKeys="true" keyProperty="workOrderId">
+        insert into inf_work_order (
+            work_order_no, domain_type, request_type, order_status, project_id, subject_id, subject_name, subject_type,
+            applicant_dept_id, applicant_name, approver_name, executor_name, request_title, request_reason,
+            current_snapshot_json, request_payload_json, approval_comment, execution_result, expect_finish_time,
+            submitted_time, approved_time, executed_time, create_by, create_time, remark
+        ) values (
+            #{workOrderNo}, #{domainType}, #{requestType}, #{orderStatus}, #{projectId}, #{subjectId}, #{subjectName}, #{subjectType},
+            #{applicantDeptId}, #{applicantName}, #{approverName}, #{executorName}, #{requestTitle}, #{requestReason},
+            #{currentSnapshotJson}, #{requestPayloadJson}, #{approvalComment}, #{executionResult}, #{expectFinishTime},
+            #{submittedTime}, #{approvedTime}, #{executedTime}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoWorkOrder" parameterType="com.ruoyi.system.domain.information.InfoWorkOrder">
+        update inf_work_order
+        <set>
+            <if test="workOrderNo != null">work_order_no = #{workOrderNo},</if>
+            <if test="domainType != null">domain_type = #{domainType},</if>
+            <if test="requestType != null">request_type = #{requestType},</if>
+            <if test="orderStatus != null">order_status = #{orderStatus},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="subjectId != null">subject_id = #{subjectId},</if>
+            <if test="subjectName != null">subject_name = #{subjectName},</if>
+            <if test="subjectType != null">subject_type = #{subjectType},</if>
+            <if test="applicantDeptId != null">applicant_dept_id = #{applicantDeptId},</if>
+            <if test="applicantName != null">applicant_name = #{applicantName},</if>
+            <if test="approverName != null">approver_name = #{approverName},</if>
+            <if test="executorName != null">executor_name = #{executorName},</if>
+            <if test="requestTitle != null">request_title = #{requestTitle},</if>
+            <if test="requestReason != null">request_reason = #{requestReason},</if>
+            <if test="currentSnapshotJson != null">current_snapshot_json = #{currentSnapshotJson},</if>
+            <if test="requestPayloadJson != null">request_payload_json = #{requestPayloadJson},</if>
+            <if test="approvalComment != null">approval_comment = #{approvalComment},</if>
+            <if test="executionResult != null">execution_result = #{executionResult},</if>
+            <if test="expectFinishTime != null">expect_finish_time = #{expectFinishTime},</if>
+            <if test="submittedTime != null">submitted_time = #{submittedTime},</if>
+            <if test="approvedTime != null">approved_time = #{approvedTime},</if>
+            <if test="executedTime != null">executed_time = #{executedTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where work_order_id = #{workOrderId}
+    </update>
+
+    <delete id="deleteInfoWorkOrderById" parameterType="Long">
+        delete from inf_work_order where work_order_id = #{workOrderId}
+    </delete>
+
+    <delete id="deleteInfoWorkOrderByIds" parameterType="Long">
+        delete from inf_work_order where work_order_id in
+        <foreach collection="array" item="workOrderId" open="(" separator="," close=")">
+            #{workOrderId}
+        </foreach>
+    </delete>
+</mapper>

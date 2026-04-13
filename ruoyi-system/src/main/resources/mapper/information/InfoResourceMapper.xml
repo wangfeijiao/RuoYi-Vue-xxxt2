@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoResourceMapper">
+
+    <sql id="selectResourceColumns">
+        select r.resource_id as resourceId, r.resource_code as resourceCode, r.resource_name as resourceName,
+               r.resource_type as resourceType, r.resource_status as resourceStatus, r.monitor_status as monitorStatus,
+               r.project_id as projectId, p.project_name as projectName, r.owner_dept_id as ownerDeptId,
+               r.owner_name as ownerName, r.maintainer_name as maintainerName, r.cpu_cores as cpuCores,
+               r.memory_gb as memoryGb, r.storage_gb as storageGb, r.os_name as osName, r.ip_address as ipAddress,
+               r.software_name as softwareName, r.software_version as softwareVersion, r.license_count as licenseCount,
+               r.delivery_time as deliveryTime, r.relation_summary as relationSummary, r.performance_summary as performanceSummary,
+               r.create_by as createBy, r.create_time as createTime, r.update_by as updateBy, r.update_time as updateTime, r.remark
+        from inf_resource r
+        left join inf_project p on r.project_id = p.project_id
+    </sql>
+
+    <select id="selectInfoResourceById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoResource">
+        <include refid="selectResourceColumns"/>
+        where r.resource_id = #{resourceId}
+    </select>
+
+    <select id="selectInfoResourceList" parameterType="com.ruoyi.system.domain.information.InfoResource" resultType="com.ruoyi.system.domain.information.InfoResource">
+        <include refid="selectResourceColumns"/>
+        <where>
+            <if test="resourceCode != null and resourceCode != ''">and r.resource_code like concat('%', #{resourceCode}, '%')</if>
+            <if test="resourceName != null and resourceName != ''">and r.resource_name like concat('%', #{resourceName}, '%')</if>
+            <if test="resourceType != null and resourceType != ''">and r.resource_type = #{resourceType}</if>
+            <if test="resourceStatus != null and resourceStatus != ''">and r.resource_status = #{resourceStatus}</if>
+            <if test="projectId != null">and r.project_id = #{projectId}</if>
+            <if test="ownerName != null and ownerName != ''">and r.owner_name like concat('%', #{ownerName}, '%')</if>
+        </where>
+        order by r.resource_id desc
+    </select>
+
+    <insert id="insertInfoResource" parameterType="com.ruoyi.system.domain.information.InfoResource" useGeneratedKeys="true" keyProperty="resourceId">
+        insert into inf_resource (
+            resource_code, resource_name, resource_type, resource_status, monitor_status, project_id, owner_dept_id,
+            owner_name, maintainer_name, cpu_cores, memory_gb, storage_gb, os_name, ip_address, software_name,
+            software_version, license_count, delivery_time, relation_summary, performance_summary, create_by, create_time, remark
+        ) values (
+            #{resourceCode}, #{resourceName}, #{resourceType}, #{resourceStatus}, #{monitorStatus}, #{projectId}, #{ownerDeptId},
+            #{ownerName}, #{maintainerName}, #{cpuCores}, #{memoryGb}, #{storageGb}, #{osName}, #{ipAddress}, #{softwareName},
+            #{softwareVersion}, #{licenseCount}, #{deliveryTime}, #{relationSummary}, #{performanceSummary}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoResource" parameterType="com.ruoyi.system.domain.information.InfoResource">
+        update inf_resource
+        <set>
+            <if test="resourceCode != null">resource_code = #{resourceCode},</if>
+            <if test="resourceName != null">resource_name = #{resourceName},</if>
+            <if test="resourceType != null">resource_type = #{resourceType},</if>
+            <if test="resourceStatus != null">resource_status = #{resourceStatus},</if>
+            <if test="monitorStatus != null">monitor_status = #{monitorStatus},</if>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="ownerDeptId != null">owner_dept_id = #{ownerDeptId},</if>
+            <if test="ownerName != null">owner_name = #{ownerName},</if>
+            <if test="maintainerName != null">maintainer_name = #{maintainerName},</if>
+            <if test="cpuCores != null">cpu_cores = #{cpuCores},</if>
+            <if test="memoryGb != null">memory_gb = #{memoryGb},</if>
+            <if test="storageGb != null">storage_gb = #{storageGb},</if>
+            <if test="osName != null">os_name = #{osName},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+            <if test="softwareName != null">software_name = #{softwareName},</if>
+            <if test="softwareVersion != null">software_version = #{softwareVersion},</if>
+            <if test="licenseCount != null">license_count = #{licenseCount},</if>
+            <if test="deliveryTime != null">delivery_time = #{deliveryTime},</if>
+            <if test="relationSummary != null">relation_summary = #{relationSummary},</if>
+            <if test="performanceSummary != null">performance_summary = #{performanceSummary},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where resource_id = #{resourceId}
+    </update>
+
+    <delete id="deleteInfoResourceById" parameterType="Long">
+        delete from inf_resource where resource_id = #{resourceId}
+    </delete>
+
+    <delete id="deleteInfoResourceByIds" parameterType="Long">
+        delete from inf_resource where resource_id in
+        <foreach collection="array" item="resourceId" open="(" separator="," close=")">
+            #{resourceId}
+        </foreach>
+    </delete>
+</mapper>

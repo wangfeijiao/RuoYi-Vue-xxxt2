@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoProjectMapper">
+
+    <sql id="selectProjectColumns">
+        select project_id as projectId, project_code as projectCode, project_name as projectName,
+               project_type as projectType, project_status as projectStatus, project_phase as projectPhase,
+               owner_dept_id as ownerDeptId, project_manager as projectManager, owner_leader as ownerLeader,
+               vendor_name as vendorName, vendor_owner as vendorOwner, portal_owner as portalOwner,
+               resource_owner as resourceOwner, data_owner as dataOwner, security_owner as securityOwner,
+               target_users as targetUsers, directory_template_json as directoryTemplateJson,
+               custom_directory_json as customDirectoryJson, acceptance_status as acceptanceStatus,
+               plan_start_date as planStartDate, plan_end_date as planEndDate,
+               create_by as createBy, create_time as createTime, update_by as updateBy,
+               update_time as updateTime, remark
+        from inf_project
+    </sql>
+
+    <select id="selectInfoProjectById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoProject">
+        <include refid="selectProjectColumns"/>
+        where project_id = #{projectId}
+    </select>
+
+    <select id="selectInfoProjectList" parameterType="com.ruoyi.system.domain.information.InfoProject" resultType="com.ruoyi.system.domain.information.InfoProject">
+        <include refid="selectProjectColumns"/>
+        <where>
+            <if test="projectCode != null and projectCode != ''">and project_code like concat('%', #{projectCode}, '%')</if>
+            <if test="projectName != null and projectName != ''">and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="projectType != null and projectType != ''">and project_type = #{projectType}</if>
+            <if test="projectStatus != null and projectStatus != ''">and project_status = #{projectStatus}</if>
+            <if test="acceptanceStatus != null and acceptanceStatus != ''">and acceptance_status = #{acceptanceStatus}</if>
+            <if test="projectManager != null and projectManager != ''">and project_manager like concat('%', #{projectManager}, '%')</if>
+        </where>
+        order by project_id desc
+    </select>
+
+    <insert id="insertInfoProject" parameterType="com.ruoyi.system.domain.information.InfoProject" useGeneratedKeys="true" keyProperty="projectId">
+        insert into inf_project (
+            project_code, project_name, project_type, project_status, project_phase, owner_dept_id, project_manager,
+            owner_leader, vendor_name, vendor_owner, portal_owner, resource_owner, data_owner, security_owner,
+            target_users, directory_template_json, custom_directory_json, acceptance_status, plan_start_date, plan_end_date,
+            create_by, create_time, remark
+        ) values (
+            #{projectCode}, #{projectName}, #{projectType}, #{projectStatus}, #{projectPhase}, #{ownerDeptId}, #{projectManager},
+            #{ownerLeader}, #{vendorName}, #{vendorOwner}, #{portalOwner}, #{resourceOwner}, #{dataOwner}, #{securityOwner},
+            #{targetUsers}, #{directoryTemplateJson}, #{customDirectoryJson}, #{acceptanceStatus}, #{planStartDate}, #{planEndDate},
+            #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoProject" parameterType="com.ruoyi.system.domain.information.InfoProject">
+        update inf_project
+        <set>
+            <if test="projectCode != null">project_code = #{projectCode},</if>
+            <if test="projectName != null">project_name = #{projectName},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="projectStatus != null">project_status = #{projectStatus},</if>
+            <if test="projectPhase != null">project_phase = #{projectPhase},</if>
+            <if test="ownerDeptId != null">owner_dept_id = #{ownerDeptId},</if>
+            <if test="projectManager != null">project_manager = #{projectManager},</if>
+            <if test="ownerLeader != null">owner_leader = #{ownerLeader},</if>
+            <if test="vendorName != null">vendor_name = #{vendorName},</if>
+            <if test="vendorOwner != null">vendor_owner = #{vendorOwner},</if>
+            <if test="portalOwner != null">portal_owner = #{portalOwner},</if>
+            <if test="resourceOwner != null">resource_owner = #{resourceOwner},</if>
+            <if test="dataOwner != null">data_owner = #{dataOwner},</if>
+            <if test="securityOwner != null">security_owner = #{securityOwner},</if>
+            <if test="targetUsers != null">target_users = #{targetUsers},</if>
+            <if test="directoryTemplateJson != null">directory_template_json = #{directoryTemplateJson},</if>
+            <if test="customDirectoryJson != null">custom_directory_json = #{customDirectoryJson},</if>
+            <if test="acceptanceStatus != null">acceptance_status = #{acceptanceStatus},</if>
+            <if test="planStartDate != null">plan_start_date = #{planStartDate},</if>
+            <if test="planEndDate != null">plan_end_date = #{planEndDate},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where project_id = #{projectId}
+    </update>
+
+    <delete id="deleteInfoProjectById" parameterType="Long">
+        delete from inf_project where project_id = #{projectId}
+    </delete>
+
+    <delete id="deleteInfoProjectByIds" parameterType="Long">
+        delete from inf_project where project_id in
+        <foreach collection="array" item="projectId" open="(" separator="," close=")">
+            #{projectId}
+        </foreach>
+    </delete>
+</mapper>

@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoProjectTemplateMapper">
+
+    <sql id="selectProjectTemplateColumns">
+        select template_id as templateId, template_name as templateName, project_type as projectType,
+               phase_name as phaseName, version_no as versionNo, directory_json as directoryJson,
+               status, create_by as createBy, create_time as createTime, update_by as updateBy,
+               update_time as updateTime, remark
+        from inf_project_template
+    </sql>
+
+    <select id="selectInfoProjectTemplateById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoProjectTemplate">
+        <include refid="selectProjectTemplateColumns"/>
+        where template_id = #{templateId}
+    </select>
+
+    <select id="selectInfoProjectTemplateList" parameterType="com.ruoyi.system.domain.information.InfoProjectTemplate" resultType="com.ruoyi.system.domain.information.InfoProjectTemplate">
+        <include refid="selectProjectTemplateColumns"/>
+        <where>
+            <if test="templateName != null and templateName != ''">and template_name like concat('%', #{templateName}, '%')</if>
+            <if test="projectType != null and projectType != ''">and project_type = #{projectType}</if>
+            <if test="status != null and status != ''">and status = #{status}</if>
+        </where>
+        order by template_id desc
+    </select>
+
+    <insert id="insertInfoProjectTemplate" parameterType="com.ruoyi.system.domain.information.InfoProjectTemplate" useGeneratedKeys="true" keyProperty="templateId">
+        insert into inf_project_template (
+            template_name, project_type, phase_name, version_no, directory_json, status, create_by, create_time, remark
+        ) values (
+            #{templateName}, #{projectType}, #{phaseName}, #{versionNo}, #{directoryJson}, #{status}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoProjectTemplate" parameterType="com.ruoyi.system.domain.information.InfoProjectTemplate">
+        update inf_project_template
+        <set>
+            <if test="templateName != null">template_name = #{templateName},</if>
+            <if test="projectType != null">project_type = #{projectType},</if>
+            <if test="phaseName != null">phase_name = #{phaseName},</if>
+            <if test="versionNo != null">version_no = #{versionNo},</if>
+            <if test="directoryJson != null">directory_json = #{directoryJson},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where template_id = #{templateId}
+    </update>
+
+    <delete id="deleteInfoProjectTemplateById" parameterType="Long">
+        delete from inf_project_template where template_id = #{templateId}
+    </delete>
+
+    <delete id="deleteInfoProjectTemplateByIds" parameterType="Long">
+        delete from inf_project_template where template_id in
+        <foreach collection="array" item="templateId" open="(" separator="," close=")">
+            #{templateId}
+        </foreach>
+    </delete>
+</mapper>
