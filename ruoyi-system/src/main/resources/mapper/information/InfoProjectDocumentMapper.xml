@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoProjectDocumentMapper">
+
+    <sql id="selectProjectDocumentColumns">
+        select d.document_id as documentId,
+               d.project_id as projectId,
+               p.project_name as projectName,
+               d.directory_id as directoryId,
+               sd.directory_name as directoryName,
+               d.document_name as documentName,
+               d.document_type as documentType,
+               d.storage_key as storageKey,
+               d.version_no as versionNo,
+               d.source_type as sourceType,
+               d.uploaded_by as uploadedBy,
+               d.uploaded_time as uploadedTime,
+               d.file_size as fileSize,
+               d.checksum,
+               d.compliance_status as complianceStatus,
+               d.archive_status as archiveStatus,
+               d.check_comment as checkComment,
+               d.deleted_flag as deletedFlag,
+               d.create_by as createBy,
+               d.create_time as createTime,
+               d.update_by as updateBy,
+               d.update_time as updateTime,
+               d.remark
+        from inf_project_document d
+        left join inf_project p on p.project_id = d.project_id
+        left join inf_project_space_directory sd on sd.directory_id = d.directory_id
+    </sql>
+
+    <select id="selectInfoProjectDocumentById" parameterType="Long"
+        resultType="com.ruoyi.system.domain.information.InfoProjectDocument">
+        <include refid="selectProjectDocumentColumns"/>
+        where d.document_id = #{documentId}
+    </select>
+
+    <select id="selectInfoProjectDocumentListByProjectId" parameterType="Long"
+        resultType="com.ruoyi.system.domain.information.InfoProjectDocument">
+        <include refid="selectProjectDocumentColumns"/>
+        where d.project_id = #{projectId}
+          and d.deleted_flag = '0'
+        order by d.document_id desc
+    </select>
+
+    <select id="countByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_document
+        where project_id = #{projectId}
+          and deleted_flag = '0'
+    </select>
+
+    <select id="countPassedComplianceByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_document
+        where project_id = #{projectId}
+          and deleted_flag = '0'
+          and compliance_status = 'PASSED'
+    </select>
+
+    <select id="countArchivedByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_document
+        where project_id = #{projectId}
+          and deleted_flag = '0'
+          and archive_status = 'ARCHIVED'
+    </select>
+
+    <insert id="insertInfoProjectDocument"
+        parameterType="com.ruoyi.system.domain.information.InfoProjectDocument"
+        useGeneratedKeys="true" keyProperty="documentId">
+        insert into inf_project_document (
+            project_id, directory_id, document_name, document_type, storage_key, version_no, source_type,
+            uploaded_by, uploaded_time, file_size, checksum, compliance_status, archive_status, check_comment,
+            deleted_flag, create_by, create_time, remark
+        ) values (
+            #{projectId}, #{directoryId}, #{documentName}, #{documentType}, #{storageKey}, #{versionNo}, #{sourceType},
+            #{uploadedBy}, #{uploadedTime}, #{fileSize}, #{checksum}, #{complianceStatus}, #{archiveStatus}, #{checkComment},
+            #{deletedFlag}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoProjectDocument"
+        parameterType="com.ruoyi.system.domain.information.InfoProjectDocument">
+        update inf_project_document
+        <set>
+            <if test="complianceStatus != null">compliance_status = #{complianceStatus},</if>
+            <if test="archiveStatus != null">archive_status = #{archiveStatus},</if>
+            <if test="checkComment != null">check_comment = #{checkComment},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where document_id = #{documentId}
+    </update>
+</mapper>

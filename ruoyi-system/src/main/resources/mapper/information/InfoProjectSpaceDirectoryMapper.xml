@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoProjectSpaceDirectoryMapper">
+
+    <sql id="selectSpaceDirectoryColumns">
+        select d.directory_id as directoryId,
+               d.project_id as projectId,
+               p.project_name as projectName,
+               d.parent_id as parentId,
+               d.template_id as templateId,
+               d.directory_code as directoryCode,
+               d.directory_name as directoryName,
+               d.directory_level as directoryLevel,
+               d.directory_type as directoryType,
+               d.full_path as fullPath,
+               d.required_flag as requiredFlag,
+               d.compliance_status as complianceStatus,
+               d.archive_status as archiveStatus,
+               d.sort_order as sortOrder,
+               d.create_by as createBy,
+               d.create_time as createTime,
+               d.update_by as updateBy,
+               d.update_time as updateTime,
+               d.remark
+        from inf_project_space_directory d
+        left join inf_project p on p.project_id = d.project_id
+    </sql>
+
+    <select id="selectInfoProjectSpaceDirectoryById" parameterType="Long"
+        resultType="com.ruoyi.system.domain.information.InfoProjectSpaceDirectory">
+        <include refid="selectSpaceDirectoryColumns"/>
+        where d.directory_id = #{directoryId}
+    </select>
+
+    <select id="selectInfoProjectSpaceDirectoryListByProjectId" parameterType="Long"
+        resultType="com.ruoyi.system.domain.information.InfoProjectSpaceDirectory">
+        <include refid="selectSpaceDirectoryColumns"/>
+        where d.project_id = #{projectId}
+        order by d.directory_level asc, d.sort_order asc, d.directory_id asc
+    </select>
+
+    <select id="countByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_space_directory
+        where project_id = #{projectId}
+    </select>
+
+    <select id="countRequiredDirectoryByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_space_directory
+        where project_id = #{projectId}
+          and required_flag = '1'
+    </select>
+
+    <select id="countDirectoryCode" resultType="int">
+        select count(1)
+        from inf_project_space_directory
+        where project_id = #{projectId}
+          and directory_code = #{directoryCode}
+    </select>
+
+    <insert id="insertInfoProjectSpaceDirectory"
+        parameterType="com.ruoyi.system.domain.information.InfoProjectSpaceDirectory"
+        useGeneratedKeys="true" keyProperty="directoryId">
+        insert into inf_project_space_directory (
+            project_id, parent_id, template_id, directory_code, directory_name, directory_level, directory_type,
+            full_path, required_flag, compliance_status, archive_status, sort_order, create_by, create_time, remark
+        ) values (
+            #{projectId}, #{parentId}, #{templateId}, #{directoryCode}, #{directoryName}, #{directoryLevel}, #{directoryType},
+            #{fullPath}, #{requiredFlag}, #{complianceStatus}, #{archiveStatus}, #{sortOrder}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoProjectSpaceDirectory"
+        parameterType="com.ruoyi.system.domain.information.InfoProjectSpaceDirectory">
+        update inf_project_space_directory
+        <set>
+            <if test="complianceStatus != null">compliance_status = #{complianceStatus},</if>
+            <if test="archiveStatus != null">archive_status = #{archiveStatus},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where directory_id = #{directoryId}
+    </update>
+</mapper>

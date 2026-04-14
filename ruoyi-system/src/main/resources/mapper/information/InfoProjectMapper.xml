@@ -5,16 +5,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.system.mapper.information.InfoProjectMapper">
 
     <sql id="selectProjectColumns">
-        select project_id as projectId, project_code as projectCode, project_name as projectName,
-               project_type as projectType, project_status as projectStatus, project_phase as projectPhase,
-               owner_dept_id as ownerDeptId, project_manager as projectManager, owner_leader as ownerLeader,
-               vendor_name as vendorName, vendor_owner as vendorOwner, portal_owner as portalOwner,
-               resource_owner as resourceOwner, data_owner as dataOwner, security_owner as securityOwner,
-               target_users as targetUsers, directory_template_json as directoryTemplateJson,
-               custom_directory_json as customDirectoryJson, acceptance_status as acceptanceStatus,
-               plan_start_date as planStartDate, plan_end_date as planEndDate,
-               create_by as createBy, create_time as createTime, update_by as updateBy,
-               update_time as updateTime, remark
+        select project_id as projectId,
+               project_code as projectCode,
+               project_name as projectName,
+               project_type as projectType,
+               project_status as projectStatus,
+               project_phase as projectPhase,
+               owner_dept_id as ownerDeptId,
+               project_manager as projectManager,
+               owner_leader as ownerLeader,
+               vendor_name as vendorName,
+               vendor_owner as vendorOwner,
+               portal_owner as portalOwner,
+               resource_owner as resourceOwner,
+               data_owner as dataOwner,
+               security_owner as securityOwner,
+               target_users as targetUsers,
+               directory_template_json as directoryTemplateJson,
+               custom_directory_json as customDirectoryJson,
+               acceptance_status as acceptanceStatus,
+               template_id as templateId,
+               template_version_no as templateVersionNo,
+               project_objective as projectObjective,
+               resource_requirement_summary as resourceRequirementSummary,
+               business_owner as businessOwner,
+               technical_owner as technicalOwner,
+               space_init_status as spaceInitStatus,
+               archive_status as archiveStatus,
+               current_acceptance_order_id as currentAcceptanceOrderId,
+               document_completion_rate as documentCompletionRate,
+               last_collaboration_time as lastCollaborationTime,
+               plan_start_date as planStartDate,
+               plan_end_date as planEndDate,
+               create_by as createBy,
+               create_time as createTime,
+               update_by as updateBy,
+               update_time as updateTime,
+               remark
         from inf_project
     </sql>
 
@@ -30,8 +57,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="projectName != null and projectName != ''">and project_name like concat('%', #{projectName}, '%')</if>
             <if test="projectType != null and projectType != ''">and project_type = #{projectType}</if>
             <if test="projectStatus != null and projectStatus != ''">and project_status = #{projectStatus}</if>
+            <if test="projectPhase != null and projectPhase != ''">and project_phase = #{projectPhase}</if>
             <if test="acceptanceStatus != null and acceptanceStatus != ''">and acceptance_status = #{acceptanceStatus}</if>
+            <if test="ownerDeptId != null">and owner_dept_id = #{ownerDeptId}</if>
             <if test="projectManager != null and projectManager != ''">and project_manager like concat('%', #{projectManager}, '%')</if>
+            <if test="archiveStatus != null and archiveStatus != ''">and archive_status = #{archiveStatus}</if>
+            <if test="spaceInitStatus != null and spaceInitStatus != ''">and space_init_status = #{spaceInitStatus}</if>
         </where>
         order by project_id desc
     </select>
@@ -40,12 +71,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into inf_project (
             project_code, project_name, project_type, project_status, project_phase, owner_dept_id, project_manager,
             owner_leader, vendor_name, vendor_owner, portal_owner, resource_owner, data_owner, security_owner,
-            target_users, directory_template_json, custom_directory_json, acceptance_status, plan_start_date, plan_end_date,
+            target_users, directory_template_json, custom_directory_json, acceptance_status, template_id, template_version_no,
+            project_objective, resource_requirement_summary, business_owner, technical_owner, space_init_status, archive_status,
+            current_acceptance_order_id, document_completion_rate, last_collaboration_time, plan_start_date, plan_end_date,
             create_by, create_time, remark
         ) values (
             #{projectCode}, #{projectName}, #{projectType}, #{projectStatus}, #{projectPhase}, #{ownerDeptId}, #{projectManager},
             #{ownerLeader}, #{vendorName}, #{vendorOwner}, #{portalOwner}, #{resourceOwner}, #{dataOwner}, #{securityOwner},
-            #{targetUsers}, #{directoryTemplateJson}, #{customDirectoryJson}, #{acceptanceStatus}, #{planStartDate}, #{planEndDate},
+            #{targetUsers}, #{directoryTemplateJson}, #{customDirectoryJson}, #{acceptanceStatus}, #{templateId}, #{templateVersionNo},
+            #{projectObjective}, #{resourceRequirementSummary}, #{businessOwner}, #{technicalOwner}, #{spaceInitStatus}, #{archiveStatus},
+            #{currentAcceptanceOrderId}, #{documentCompletionRate}, #{lastCollaborationTime}, #{planStartDate}, #{planEndDate},
             #{createBy}, sysdate(), #{remark}
         )
     </insert>
@@ -71,6 +106,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="directoryTemplateJson != null">directory_template_json = #{directoryTemplateJson},</if>
             <if test="customDirectoryJson != null">custom_directory_json = #{customDirectoryJson},</if>
             <if test="acceptanceStatus != null">acceptance_status = #{acceptanceStatus},</if>
+            <if test="templateId != null">template_id = #{templateId},</if>
+            <if test="templateVersionNo != null">template_version_no = #{templateVersionNo},</if>
+            <if test="projectObjective != null">project_objective = #{projectObjective},</if>
+            <if test="resourceRequirementSummary != null">resource_requirement_summary = #{resourceRequirementSummary},</if>
+            <if test="businessOwner != null">business_owner = #{businessOwner},</if>
+            <if test="technicalOwner != null">technical_owner = #{technicalOwner},</if>
+            <if test="spaceInitStatus != null">space_init_status = #{spaceInitStatus},</if>
+            <if test="archiveStatus != null">archive_status = #{archiveStatus},</if>
+            <if test="currentAcceptanceOrderId != null">current_acceptance_order_id = #{currentAcceptanceOrderId},</if>
+            <if test="documentCompletionRate != null">document_completion_rate = #{documentCompletionRate},</if>
+            <if test="lastCollaborationTime != null">last_collaboration_time = #{lastCollaborationTime},</if>
             <if test="planStartDate != null">plan_start_date = #{planStartDate},</if>
             <if test="planEndDate != null">plan_end_date = #{planEndDate},</if>
             <if test="remark != null">remark = #{remark},</if>

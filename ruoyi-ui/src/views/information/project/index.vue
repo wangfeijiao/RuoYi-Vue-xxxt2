@@ -94,6 +94,51 @@
         </el-table>
         <pagination v-show="orderTotal > 0" :total="orderTotal" :page.sync="orderQuery.pageNum" :limit.sync="orderQuery.pageSize" @pagination="loadOrders" />
       </el-tab-pane>
+      <el-tab-pane label="权限配置" name="permission">
+        <el-alert
+          v-if="!permissionProjectId"
+          title="请先在项目台账中勾选一个项目"
+          type="info"
+          :closable="false"
+          show-icon />
+
+        <div v-else>
+          <el-row :gutter="10" class="mb8">
+            <el-col :span="8">
+              <span>当前项目：</span>
+              <el-tag size="mini" type="success">{{ permissionProjectName || permissionProjectId }}</el-tag>
+            </el-col>
+            <el-col :span="16" class="text-right">
+              <el-button size="mini" icon="el-icon-refresh" @click="loadPermissions">刷新</el-button>
+              <el-button size="mini" icon="el-icon-s-operation" @click="useSelectedProjectForPermission">使用当前勾选项目</el-button>
+              <el-button type="primary" plain size="mini" icon="el-icon-plus" @click="openPermissionDialog()" v-hasPermi="['information:project:permission']">新增授权</el-button>
+              <el-button type="success" plain size="mini" icon="el-icon-edit" :disabled="permissionSingle" @click="openPermissionDialog(selectedPermission)" v-hasPermi="['information:project:permission']">修改</el-button>
+              <el-button type="danger" plain size="mini" icon="el-icon-delete" :disabled="permissionSingle" @click="removePermission()" v-hasPermi="['information:project:permission']">删除</el-button>
+            </el-col>
+          </el-row>
+
+          <el-row :gutter="12" class="mb8">
+            <el-col :span="6"><el-card shadow="never"><div slot="header">项目级</div><div>{{ permissionMatrix.projectPermissions.length }}</div></el-card></el-col>
+            <el-col :span="6"><el-card shadow="never"><div slot="header">目录级</div><div>{{ permissionMatrix.directoryPermissions.length }}</div></el-card></el-col>
+            <el-col :span="6"><el-card shadow="never"><div slot="header">文档级</div><div>{{ permissionMatrix.documentPermissions.length }}</div></el-card></el-col>
+            <el-col :span="6"><el-card shadow="never"><div slot="header">推荐角色</div><div>{{ permissionMatrix.defaultRoleSuggestions.length }}</div></el-card></el-col>
+          </el-row>
+
+          <el-table v-loading="permissionLoading" :data="permissionList" @selection-change="handlePermissionSelection">
+            <el-table-column type="selection" width="55" />
+            <el-table-column label="范围" prop="scopeType" width="120" />
+            <el-table-column label="范围ID" prop="scopeId" width="120" />
+            <el-table-column label="对象类型" prop="targetType" width="120" />
+            <el-table-column label="对象标识" prop="targetKey" min-width="160" />
+            <el-table-column label="查看" prop="canView" width="80" />
+            <el-table-column label="编辑" prop="canEdit" width="80" />
+            <el-table-column label="下载" prop="canDownload" width="80" />
+            <el-table-column label="删除" prop="canDelete" width="80" />
+            <el-table-column label="继承" prop="inheritFlag" width="80" />
+            <el-table-column label="备注" prop="remark" min-width="180" />
+          </el-table>
+        </div>
+      </el-tab-pane>
     </el-tabs>
 
     <el-dialog :title="projectDialogTitle" :visible.sync="projectOpen" width="980px" append-to-body>
@@ -166,6 +211,39 @@
       </el-form>
       <div slot="footer"><el-button type="primary" @click="submitExecute">确定</el-button><el-button @click="executeOpen = false">取消</el-button></div>
     </el-dialog>
+    <el-dialog :title="permissionDialogTitle" :visible.sync="permissionOpen" width="720px" append-to-body>
+      <el-form ref="permissionFormRef" :model="permissionForm" :rules="permissionRules" label-width="100px">
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="授权范围" prop="scopeType">
+              <el-select v-model="permissionForm.scopeType" placeholder="请选择">
+                <el-option label="PROJECT" value="PROJECT" />
+                <el-option label="DIRECTORY" value="DIRECTORY" />
+                <el-option label="DOCUMENT" value="DOCUMENT" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12"><el-form-item label="范围ID"><el-input v-model="permissionForm.scopeId" :disabled="permissionForm.scopeType === 'PROJECT'" placeholder="PROJECT 范围可留空" /></el-form-item></el-col>
+          <el-col :span="12">
+            <el-form-item label="对象类型" prop="targetType">
+              <el-select v-model="permissionForm.targetType" placeholder="请选择">
+                <el-option label="USER" value="USER" />
+                <el-option label="ROLE" value="ROLE" />
+                <el-option label="TEAM" value="TEAM" />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12"><el-form-item label="对象标识" prop="targetKey"><el-input v-model="permissionForm.targetKey" placeholder="如 project_observer / u1001" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="可查看"><el-switch v-model="permissionForm.canView" active-value="1" inactive-value="0" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="可编辑"><el-switch v-model="permissionForm.canEdit" active-value="1" inactive-value="0" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="可下载"><el-switch v-model="permissionForm.canDownload" active-value="1" inactive-value="0" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="可删除"><el-switch v-model="permissionForm.canDelete" active-value="1" inactive-value="0" /></el-form-item></el-col>
+          <el-col :span="12"><el-form-item label="继承上级"><el-switch v-model="permissionForm.inheritFlag" active-value="1" inactive-value="0" /></el-form-item></el-col>
+          <el-col :span="24"><el-form-item label="备注"><el-input type="textarea" :rows="3" v-model="permissionForm.remark" /></el-form-item></el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer"><el-button type="primary" @click="submitPermission">确定</el-button><el-button @click="permissionOpen = false">取消</el-button></div>
+    </el-dialog>
   </div>
 </template>
 
@@ -173,16 +251,21 @@
 import {
   addProject,
   addProjectOrder,
+  addProjectPermission,
   addProjectTemplate,
   approveProjectOrder,
+  delProjectPermission,
   delProject,
   delProjectTemplate,
   executeProjectOrder,
   getProject,
+  getProjectPermissionMatrix,
   getProjectTemplate,
   listProject,
   listProjectOrder,
+  listProjectPermission,
   listProjectTemplate,
+  updateProjectPermission,
   updateProject,
   updateProjectOrder,
   updateProjectTemplate
@@ -196,9 +279,11 @@ export default {
       projectLoading: false,
       templateLoading: false,
       orderLoading: false,
+      permissionLoading: false,
       projectList: [],
       templateList: [],
       orderList: [],
+      permissionList: [],
       projectTotal: 0,
       templateTotal: 0,
       orderTotal: 0,
@@ -207,18 +292,30 @@ export default {
       selectedProject: null,
       selectedTemplate: null,
       selectedOrder: null,
+      selectedPermission: null,
       projectSingle: true,
       projectMultiple: true,
       templateSingle: true,
       templateMultiple: true,
       orderSingle: true,
+      permissionSingle: true,
       projectOpen: false,
       templateOpen: false,
       orderOpen: false,
       approveOpen: false,
       executeOpen: false,
+      permissionOpen: false,
       projectDialogTitle: '',
       templateDialogTitle: '',
+      permissionDialogTitle: '',
+      permissionProjectId: undefined,
+      permissionProjectName: '',
+      permissionMatrix: {
+        projectPermissions: [],
+        directoryPermissions: [],
+        documentPermissions: [],
+        defaultRoleSuggestions: []
+      },
       projectStatusOptions: [
         { label: '草稿', value: 'DRAFT' },
         { label: '执行中', value: 'RUNNING' },
@@ -228,9 +325,11 @@ export default {
       projectQuery: { pageNum: 1, pageSize: 10, projectName: undefined, projectStatus: undefined },
       templateQuery: { pageNum: 1, pageSize: 10 },
       orderQuery: { pageNum: 1, pageSize: 10 },
+      permissionQuery: {},
       projectForm: {},
       templateForm: {},
       orderForm: {},
+      permissionForm: {},
       approveForm: { approved: true, approvalComment: '' },
       executeForm: { executorName: '', targetStatus: 'ACCEPTED', executionResult: '' },
       projectRules: {
@@ -243,6 +342,11 @@ export default {
       orderRules: {
         requestTitle: [{ required: true, message: '请输入工单标题', trigger: 'blur' }],
         projectId: [{ required: true, message: '请输入关联项目ID', trigger: 'blur' }]
+      },
+      permissionRules: {
+        scopeType: [{ required: true, message: '请选择授权范围', trigger: 'change' }],
+        targetType: [{ required: true, message: '请选择对象类型', trigger: 'change' }],
+        targetKey: [{ required: true, message: '请输入对象标识', trigger: 'blur' }]
       }
     }
   },
@@ -257,6 +361,8 @@ export default {
         this.loadProjects()
       } else if (this.activeTab === 'template') {
         this.loadTemplates()
+      } else if (this.activeTab === 'permission') {
+        this.loadPermissions()
       } else {
         this.loadOrders()
       }
@@ -280,12 +386,22 @@ export default {
       this.selectedProject = selection[0]
       this.projectSingle = selection.length !== 1
       this.projectMultiple = !selection.length
+      if (selection.length === 1) {
+        this.permissionProjectId = selection[0].projectId
+        this.permissionProjectName = selection[0].projectName
+        if (this.activeTab === 'permission') {
+          this.loadPermissions()
+        }
+      }
     },
     resetProjectForm() {
       this.projectForm = {
         projectId: undefined,
         projectStatus: 'DRAFT',
-        acceptanceStatus: 'PENDING'
+        acceptanceStatus: 'PENDING',
+        spaceInitStatus: 'PENDING',
+        archiveStatus: 'UNARCHIVED',
+        documentCompletionRate: 0
       }
       this.resetForm('projectFormRef')
     },
@@ -406,6 +522,9 @@ export default {
     },
     openOrderDialog() {
       this.resetOrderForm()
+      if (this.selectedProject && this.selectedProject.projectId) {
+        this.orderForm.projectId = this.selectedProject.projectId
+      }
       this.orderOpen = true
     },
     submitOrder() {
@@ -451,7 +570,116 @@ export default {
         this.loadOrders()
         this.loadProjects()
       })
+    },
+    useSelectedProjectForPermission() {
+      if (!this.selectedProject || !this.selectedProject.projectId) {
+        this.$modal.msgWarning('请先在项目台账中勾选一个项目')
+        return
+      }
+      this.permissionProjectId = this.selectedProject.projectId
+      this.permissionProjectName = this.selectedProject.projectName
+      this.loadPermissions()
+    },
+    loadPermissions() {
+      if (!this.permissionProjectId) {
+        this.permissionList = []
+        this.permissionMatrix = {
+          projectPermissions: [],
+          directoryPermissions: [],
+          documentPermissions: [],
+          defaultRoleSuggestions: []
+        }
+        return
+      }
+      this.permissionLoading = true
+      Promise.all([
+        listProjectPermission(this.permissionProjectId, this.permissionQuery),
+        getProjectPermissionMatrix(this.permissionProjectId)
+      ]).then(([listResp, matrixResp]) => {
+        this.permissionList = listResp.data || []
+        this.permissionMatrix = matrixResp.data || {
+          projectPermissions: [],
+          directoryPermissions: [],
+          documentPermissions: [],
+          defaultRoleSuggestions: []
+        }
+        this.permissionLoading = false
+      }).catch(() => {
+        this.permissionLoading = false
+      })
+    },
+    handlePermissionSelection(selection) {
+      this.selectedPermission = selection[0]
+      this.permissionSingle = selection.length !== 1
+    },
+    resetPermissionForm() {
+      this.permissionForm = {
+        permissionId: undefined,
+        scopeType: 'PROJECT',
+        scopeId: undefined,
+        targetType: 'ROLE',
+        targetKey: '',
+        canView: '1',
+        canEdit: '0',
+        canDownload: '1',
+        canDelete: '0',
+        inheritFlag: '1',
+        remark: ''
+      }
+      this.resetForm('permissionFormRef')
+    },
+    openPermissionDialog(row) {
+      if (!this.permissionProjectId) {
+        this.$modal.msgWarning('请先选择项目')
+        return
+      }
+      this.resetPermissionForm()
+      if (row && row.permissionId) {
+        this.permissionForm = Object.assign({}, row)
+        this.permissionDialogTitle = '修改授权'
+      } else {
+        this.permissionDialogTitle = '新增授权'
+      }
+      this.permissionOpen = true
+    },
+    submitPermission() {
+      this.$refs.permissionFormRef.validate(valid => {
+        if (!valid) {
+          return
+        }
+        const payload = Object.assign({}, this.permissionForm)
+        if (payload.scopeType === 'PROJECT') {
+          payload.scopeId = undefined
+        }
+        const request = payload.permissionId
+          ? updateProjectPermission(this.permissionProjectId, payload.permissionId, payload)
+          : addProjectPermission(this.permissionProjectId, payload)
+        Promise.resolve(request).then(() => {
+          this.$modal.msgSuccess(payload.permissionId ? '修改成功' : '新增成功')
+          this.permissionOpen = false
+          this.loadPermissions()
+        })
+      })
+    },
+    removePermission(row) {
+      const target = row || this.selectedPermission
+      if (!target || !target.permissionId) {
+        this.$modal.msgWarning('请选择要删除的授权')
+        return
+      }
+      this.$modal.confirm(`确认删除授权对象 ${target.targetKey} 吗？`).then(() => {
+        return delProjectPermission(this.permissionProjectId, target.permissionId)
+      }).then(() => {
+        this.$modal.msgSuccess('删除成功')
+        this.loadPermissions()
+      }).catch(() => {})
     }
   }
 }
 </script>
+
+<style scoped>
+.text-right {
+  text-align: right;
+}
+</style>

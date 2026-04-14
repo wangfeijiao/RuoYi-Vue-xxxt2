@@ -1,5 +1,6 @@
 package com.ruoyi.system.domain.information;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ruoyi.common.core.domain.BaseEntity;
@@ -25,6 +26,18 @@ public class InfoProject extends BaseEntity
     private String directoryTemplateJson;
     private String customDirectoryJson;
     private String acceptanceStatus;
+    private Long templateId;
+    private String templateVersionNo;
+    private String projectObjective;
+    private String resourceRequirementSummary;
+    private String businessOwner;
+    private String technicalOwner;
+    private String spaceInitStatus;
+    private String archiveStatus;
+    private Long currentAcceptanceOrderId;
+    private BigDecimal documentCompletionRate;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date lastCollaborationTime;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private Date planStartDate;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -68,6 +81,28 @@ public class InfoProject extends BaseEntity
     public void setCustomDirectoryJson(String customDirectoryJson) { this.customDirectoryJson = customDirectoryJson; }
     public String getAcceptanceStatus() { return acceptanceStatus; }
     public void setAcceptanceStatus(String acceptanceStatus) { this.acceptanceStatus = acceptanceStatus; }
+    public Long getTemplateId() { return templateId; }
+    public void setTemplateId(Long templateId) { this.templateId = templateId; }
+    public String getTemplateVersionNo() { return templateVersionNo; }
+    public void setTemplateVersionNo(String templateVersionNo) { this.templateVersionNo = templateVersionNo; }
+    public String getProjectObjective() { return projectObjective; }
+    public void setProjectObjective(String projectObjective) { this.projectObjective = projectObjective; }
+    public String getResourceRequirementSummary() { return resourceRequirementSummary; }
+    public void setResourceRequirementSummary(String resourceRequirementSummary) { this.resourceRequirementSummary = resourceRequirementSummary; }
+    public String getBusinessOwner() { return businessOwner; }
+    public void setBusinessOwner(String businessOwner) { this.businessOwner = businessOwner; }
+    public String getTechnicalOwner() { return technicalOwner; }
+    public void setTechnicalOwner(String technicalOwner) { this.technicalOwner = technicalOwner; }
+    public String getSpaceInitStatus() { return spaceInitStatus; }
+    public void setSpaceInitStatus(String spaceInitStatus) { this.spaceInitStatus = spaceInitStatus; }
+    public String getArchiveStatus() { return archiveStatus; }
+    public void setArchiveStatus(String archiveStatus) { this.archiveStatus = archiveStatus; }
+    public Long getCurrentAcceptanceOrderId() { return currentAcceptanceOrderId; }
+    public void setCurrentAcceptanceOrderId(Long currentAcceptanceOrderId) { this.currentAcceptanceOrderId = currentAcceptanceOrderId; }
+    public BigDecimal getDocumentCompletionRate() { return documentCompletionRate; }
+    public void setDocumentCompletionRate(BigDecimal documentCompletionRate) { this.documentCompletionRate = documentCompletionRate; }
+    public Date getLastCollaborationTime() { return lastCollaborationTime; }
+    public void setLastCollaborationTime(Date lastCollaborationTime) { this.lastCollaborationTime = lastCollaborationTime; }
     public Date getPlanStartDate() { return planStartDate; }
     public void setPlanStartDate(Date planStartDate) { this.planStartDate = planStartDate; }
     public Date getPlanEndDate() { return planEndDate; }

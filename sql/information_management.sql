@@ -249,6 +249,61 @@ SET @info_network := @menu_max + 11;
 SET @info_network_order := @menu_max + 12;
 SET @btn_start := @menu_max + 20;
 
+CREATE TABLE IF NOT EXISTS inf_project_space_directory (
+  directory_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '鐩綍ID',
+  project_id bigint(20) NOT NULL COMMENT '椤圭洰ID',
+  parent_id bigint(20) NOT NULL DEFAULT 0 COMMENT '鐖剁洰褰昑D',
+  template_id bigint(20) DEFAULT NULL COMMENT '妯℃澘ID',
+  directory_code varchar(64) NOT NULL COMMENT '鐩綍缂栫爜',
+  directory_name varchar(128) NOT NULL COMMENT '鐩綍鍚嶇О',
+  directory_level int(11) NOT NULL DEFAULT 1 COMMENT '鐩綍灞傜骇',
+  directory_type varchar(32) NOT NULL COMMENT '鐩綍绫诲瀷',
+  full_path varchar(500) NOT NULL COMMENT '鐩綍鍏ㄨ矾寰?',
+  required_flag char(1) NOT NULL DEFAULT '0' COMMENT '鏄惁蹇呬紶',
+  compliance_status varchar(32) NOT NULL DEFAULT 'PENDING_CHECK' COMMENT '鍚堣鐘舵€?,
+  archive_status varchar(32) NOT NULL DEFAULT 'UNARCHIVED' COMMENT '褰掓。鐘舵€?,
+  sort_order int(11) NOT NULL DEFAULT 0 COMMENT '鎺掑簭',
+  create_by varchar(64) DEFAULT '' COMMENT '鍒涘缓鑰?,
+  create_time datetime DEFAULT NULL COMMENT '鍒涘缓鏃堕棿',
+  update_by varchar(64) DEFAULT '' COMMENT '鏇存柊鑰?,
+  update_time datetime DEFAULT NULL COMMENT '鏇存柊鏃堕棿',
+  remark varchar(500) DEFAULT NULL COMMENT '澶囨敞',
+  PRIMARY KEY (directory_id),
+  UNIQUE KEY uk_project_directory_code (project_id, directory_code),
+  KEY idx_project_directory_parent (project_id, parent_id),
+  KEY idx_project_directory_required (project_id, required_flag),
+  KEY idx_project_directory_compliance (project_id, compliance_status),
+  KEY idx_project_directory_archive (project_id, archive_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='椤圭洰绌洪棿鐩綍琛?;
+
+CREATE TABLE IF NOT EXISTS inf_project_document (
+  document_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '鏂囨。ID',
+  project_id bigint(20) NOT NULL COMMENT '椤圭洰ID',
+  directory_id bigint(20) NOT NULL COMMENT '鐩綍ID',
+  document_name varchar(255) NOT NULL COMMENT '鏂囨。鍚嶇О',
+  document_type varchar(32) NOT NULL COMMENT '鏂囨。绫诲瀷',
+  storage_key varchar(255) DEFAULT NULL COMMENT '瀛樺偍閿?',
+  version_no varchar(32) NOT NULL DEFAULT 'V1' COMMENT '鐗堟湰鍙?,
+  source_type varchar(32) NOT NULL COMMENT '鏉ユ簮绫诲瀷',
+  uploaded_by varchar(64) NOT NULL COMMENT '涓婁紶浜?,
+  uploaded_time datetime NOT NULL COMMENT '涓婁紶鏃堕棿',
+  file_size bigint(20) DEFAULT NULL COMMENT '鏂囦欢澶у皬',
+  checksum varchar(64) DEFAULT NULL COMMENT '鏍￠獙鍊?,
+  compliance_status varchar(32) NOT NULL DEFAULT 'PENDING_CHECK' COMMENT '鍚堣鐘舵€?,
+  archive_status varchar(32) NOT NULL DEFAULT 'UNARCHIVED' COMMENT '褰掓。鐘舵€?,
+  check_comment varchar(500) DEFAULT NULL COMMENT '妫€鏌ユ剰瑙?,
+  deleted_flag char(1) NOT NULL DEFAULT '0' COMMENT '鍒犻櫎鏍囪',
+  create_by varchar(64) DEFAULT '' COMMENT '鍒涘缓鑰?,
+  create_time datetime DEFAULT NULL COMMENT '鍒涘缓鏃堕棿',
+  update_by varchar(64) DEFAULT '' COMMENT '鏇存柊鑰?,
+  update_time datetime DEFAULT NULL COMMENT '鏇存柊鏃堕棿',
+  remark varchar(500) DEFAULT NULL COMMENT '澶囨敞',
+  PRIMARY KEY (document_id),
+  KEY idx_project_directory_document (project_id, directory_id),
+  KEY idx_document_compliance (project_id, compliance_status),
+  KEY idx_document_archive (project_id, archive_status)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='椤圭洰鏂囨。鍏冩暟鎹〃';
+
 INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, `query`, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES
 (@info_root, '信息化管理', 0, 3, 'information', NULL, '', '', 1, 0, 'M', '0', '0', '', 'chart', 'admin', sysdate(), '', NULL, '信息化管理目录'),
 (@info_dashboard, '总览看板', @info_root, 1, 'dashboard', 'information/dashboard/index', '', 'InformationDashboard', 1, 0, 'C', '0', '0', 'information:dashboard:list', 'dashboard', 'admin', sysdate(), '', NULL, '信息化总览'),
@@ -300,4 +355,65 @@ INSERT INTO sys_role_menu (role_id, menu_id)
 SELECT 1, menu_id
 FROM sys_menu
 WHERE menu_id BETWEEN @info_root AND (@btn_start + 31)
+  AND menu_id NOT IN (SELECT menu_id FROM sys_role_menu WHERE role_id = 1);
+
+ALTER TABLE inf_project
+  ADD COLUMN IF NOT EXISTS template_id bigint(20) DEFAULT NULL COMMENT '模板ID' AFTER acceptance_status,
+  ADD COLUMN IF NOT EXISTS template_version_no varchar(32) DEFAULT NULL COMMENT '模板版本号' AFTER template_id,
+  ADD COLUMN IF NOT EXISTS project_objective varchar(500) DEFAULT NULL COMMENT '项目目标' AFTER template_version_no,
+  ADD COLUMN IF NOT EXISTS resource_requirement_summary text COMMENT '资源需求摘要' AFTER project_objective,
+  ADD COLUMN IF NOT EXISTS business_owner varchar(64) DEFAULT NULL COMMENT '业务负责人' AFTER resource_requirement_summary,
+  ADD COLUMN IF NOT EXISTS technical_owner varchar(64) DEFAULT NULL COMMENT '技术负责人' AFTER business_owner,
+  ADD COLUMN IF NOT EXISTS space_init_status varchar(32) NOT NULL DEFAULT 'PENDING' COMMENT '空间初始化状态' AFTER technical_owner,
+  ADD COLUMN IF NOT EXISTS archive_status varchar(32) NOT NULL DEFAULT 'UNARCHIVED' COMMENT '归档状态' AFTER space_init_status,
+  ADD COLUMN IF NOT EXISTS current_acceptance_order_id bigint(20) DEFAULT NULL COMMENT '当前验收主单ID' AFTER archive_status,
+  ADD COLUMN IF NOT EXISTS document_completion_rate decimal(5,2) NOT NULL DEFAULT 0.00 COMMENT '资料完备度' AFTER current_acceptance_order_id,
+  ADD COLUMN IF NOT EXISTS last_collaboration_time datetime DEFAULT NULL COMMENT '最近协同时间' AFTER document_completion_rate;
+
+ALTER TABLE inf_project
+  ADD INDEX IF NOT EXISTS idx_project_phase (project_phase),
+  ADD INDEX IF NOT EXISTS idx_project_acceptance (acceptance_status),
+  ADD INDEX IF NOT EXISTS idx_project_archive (archive_status),
+  ADD INDEX IF NOT EXISTS idx_project_owner_dept (owner_dept_id),
+  ADD INDEX IF NOT EXISTS idx_project_current_order (current_acceptance_order_id);
+
+CREATE TABLE IF NOT EXISTS inf_project_permission_rel (
+  permission_id bigint(20) NOT NULL AUTO_INCREMENT COMMENT '授权ID',
+  project_id bigint(20) NOT NULL COMMENT '项目ID',
+  scope_type varchar(32) NOT NULL COMMENT '授权范围',
+  scope_id bigint(20) DEFAULT NULL COMMENT '范围对象ID',
+  target_type varchar(32) NOT NULL COMMENT '授权对象类型',
+  target_key varchar(64) NOT NULL COMMENT '授权对象标识',
+  can_view char(1) NOT NULL DEFAULT '0' COMMENT '是否可查看',
+  can_edit char(1) NOT NULL DEFAULT '0' COMMENT '是否可编辑',
+  can_download char(1) NOT NULL DEFAULT '0' COMMENT '是否可下载',
+  can_delete char(1) NOT NULL DEFAULT '0' COMMENT '是否可删除',
+  inherit_flag char(1) NOT NULL DEFAULT '1' COMMENT '是否继承上级授权',
+  start_time datetime DEFAULT NULL COMMENT '生效开始时间',
+  end_time datetime DEFAULT NULL COMMENT '生效结束时间',
+  create_by varchar(64) DEFAULT '' COMMENT '创建者',
+  create_time datetime DEFAULT NULL COMMENT '创建时间',
+  update_by varchar(64) DEFAULT '' COMMENT '更新者',
+  update_time datetime DEFAULT NULL COMMENT '更新时间',
+  remark varchar(500) DEFAULT NULL COMMENT '备注',
+  PRIMARY KEY (permission_id),
+  UNIQUE KEY uk_scope_target (project_id, scope_type, scope_id, target_type, target_key),
+  KEY idx_permission_project_scope (project_id, scope_type, scope_id),
+  KEY idx_permission_target (target_type, target_key)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='项目权限关系表';
+
+INSERT INTO sys_menu (menu_id, menu_name, parent_id, order_num, path, component, `query`, route_name, is_frame, is_cache, menu_type, visible, status, perms, icon, create_by, create_time, update_by, update_time, remark) VALUES
+(@btn_start + 32, '详情', @info_project, 5, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:detail', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 33, '空间', @info_project, 6, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:space', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 34, '文档', @info_project, 7, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:document', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 35, '协同', @info_project, 8, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:collaboration', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 36, '评审', @info_project, 9, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:review', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 37, '权限', @info_project, 10, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:permission', '#', 'admin', sysdate(), '', NULL, ''),
+(@btn_start + 38, '统计', @info_project, 11, '', '', '', '', 1, 0, 'F', '0', '0', 'information:project:stats', '#', 'admin', sysdate(), '', NULL, '')
+ON DUPLICATE KEY UPDATE menu_name = VALUES(menu_name), perms = VALUES(perms), order_num = VALUES(order_num);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 1, menu_id
+FROM sys_menu
+WHERE menu_id BETWEEN (@btn_start + 32) AND (@btn_start + 38)
   AND menu_id NOT IN (SELECT menu_id FROM sys_role_menu WHERE role_id = 1);

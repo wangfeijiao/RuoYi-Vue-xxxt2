@@ -1,0 +1,287 @@
+- generic [ref=e2]:
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - link "若依管理系统" [ref=e32] [cursor=pointer]:
+        - /url: /
+        - img [ref=e33]
+        - heading "若依管理系统" [level=1] [ref=e34]
+      - menubar [ref=e38]:
+        - link "首页" [ref=e40] [cursor=pointer]:
+          - /url: /index
+          - menuitem "首页" [ref=e41]:
+            - img [ref=e42]
+            - text: 首页
+        - menuitem "系统管理 " [ref=e45]:
+          - generic [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+            - text: 系统管理
+            - generic [ref=e49]: 
+          - text: 
+        - menuitem "系统监控 " [ref=e51]:
+          - generic [ref=e52] [cursor=pointer]:
+            - img [ref=e53]
+            - text: 系统监控
+            - generic [ref=e55]: 
+        - menuitem "系统工具 " [ref=e57]:
+          - generic [ref=e58] [cursor=pointer]:
+            - img [ref=e59]
+            - text: 系统工具
+            - generic [ref=e61]: 
+        - menuitem "信息化管理 " [expanded] [ref=e63]:
+          - generic [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - text: 信息化管理
+            - generic [ref=e67]: 
+          - menu [ref=e309]:
+            - link "总览看板" [ref=e311] [cursor=pointer]:
+              - /url: /information/dashboard
+              - menuitem "总览看板" [ref=e312]:
+                - img [ref=e313]
+                - text: 总览看板
+            - link "项目管理" [ref=e316] [cursor=pointer]:
+              - /url: /information/project
+              - menuitem "项目管理" [ref=e317]:
+                - img [ref=e318]
+                - text: 项目管理
+            - link "IT资源管理" [ref=e321] [cursor=pointer]:
+              - /url: /information/resource
+              - menuitem "IT资源管理" [ref=e322]:
+                - img [ref=e323]
+                - text: IT资源管理
+            - link "应用管理" [ref=e326] [cursor=pointer]:
+              - /url: /information/application
+              - menuitem "应用管理" [ref=e327]:
+                - img [ref=e328]
+                - text: 应用管理
+            - link "数据资源管理" [ref=e331] [cursor=pointer]:
+              - /url: /information/dataAsset
+              - menuitem "数据资源管理" [ref=e332]:
+                - img [ref=e333]
+                - text: 数据资源管理
+            - link "网络安全管理" [ref=e336] [cursor=pointer]:
+              - /url: /information/network
+              - menuitem "网络安全管理" [ref=e337]:
+                - img [ref=e338]
+                - text: 网络安全管理
+        - link "若依官网" [ref=e69] [cursor=pointer]:
+          - /url: http://ruoyi.vip
+          - menuitem "若依官网" [ref=e70]:
+            - img [ref=e71]
+            - text: 若依官网
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - img [ref=e78] [cursor=pointer]
+          - navigation "Breadcrumb" [ref=e80]:
+            - link "首页" [ref=e82]
+          - generic [ref=e83]:
+            - img [ref=e85] [cursor=pointer]
+            - img [ref=e88] [cursor=pointer]
+            - img [ref=e91] [cursor=pointer]
+            - img [ref=e94] [cursor=pointer]
+            - button [ref=e97] [cursor=pointer]:
+              - img [ref=e98]
+            - generic [ref=e100] [cursor=pointer]:
+              - generic [ref=e101]:
+                - img [ref=e102]
+                - generic: "3"
+              - text: 
+            - button "若依" [ref=e105] [cursor=pointer]:
+              - img [ref=e106]
+              - text: 若依
+        - generic [ref=e107]:
+          - generic [ref=e109]: 
+          - generic [ref=e113] [cursor=pointer]: 首页
+          - generic [ref=e117]: 
+          - generic [ref=e118]:
+            - button "" [ref=e119] [cursor=pointer]:
+              - generic [ref=e120]: 
+            - text:     
+          - generic "刷新页面" [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]: 
+            - text: 刷新
+          - text:    
+      - generic [ref=e124]:
+        - generic [ref=e125]:
+          - generic [ref=e126]:
+            - heading "若依后台管理框架" [level=2] [ref=e127]
+            - paragraph [ref=e128]: 一直想做一款后台管理系统，看了很多优秀的开源项目但是发现没有合适自己的。于是利用空闲休息时间开始自己写一套后台系统。如此有了若依管理系统，她可以用于所有的Web应用程序，如网站管理后台，网站会员中心，CMS，CRM，OA等等，当然，您也可以对她进行深度定制，以做出更强系统。所有前端后台代码封装过后十分精简易上手，出错概率低。同时支持移动客户端访问。系统会陆续更新一些实用功能。
+            - paragraph [ref=e129]: "当前版本: v3.9.2"
+            - paragraph [ref=e130]:
+              - generic [ref=e131]: ¥免费开源
+            - paragraph [ref=e132]:
+              - button " 访问码云" [ref=e133] [cursor=pointer]:
+                - generic [ref=e134]: 
+                - text: 访问码云
+              - button " 访问主页" [ref=e135] [cursor=pointer]:
+                - generic [ref=e136]: 
+                - text: 访问主页
+          - generic [ref=e137]:
+            - heading "技术选型" [level=2] [ref=e140]
+            - generic [ref=e141]:
+              - generic [ref=e142]:
+                - heading "后端技术" [level=4] [ref=e143]
+                - list [ref=e144]:
+                  - listitem [ref=e145]: SpringBoot
+                  - listitem [ref=e146]: Spring Security
+                  - listitem [ref=e147]: JWT
+                  - listitem [ref=e148]: MyBatis
+                  - listitem [ref=e149]: Druid
+                  - listitem [ref=e150]: Fastjson
+                  - listitem [ref=e151]: ...
+              - generic [ref=e152]:
+                - heading "前端技术" [level=4] [ref=e153]
+                - list [ref=e154]:
+                  - listitem [ref=e155]: Vue
+                  - listitem [ref=e156]: Vuex
+                  - listitem [ref=e157]: Element-ui
+                  - listitem [ref=e158]: Axios
+                  - listitem [ref=e159]: Sass
+                  - listitem [ref=e160]: Quill
+                  - listitem [ref=e161]: ...
+        - generic [ref=e163]:
+          - generic [ref=e165]:
+            - generic [ref=e167]: 联系信息
+            - generic [ref=e169]:
+              - paragraph [ref=e170]:
+                - generic [ref=e171]: 
+                - text: 官网：
+                - link "http://www.ruoyi.vip" [ref=e172] [cursor=pointer]:
+                  - /url: http://www.ruoyi.vip
+                  - generic [ref=e173]: http://www.ruoyi.vip
+              - paragraph [ref=e174]:
+                - generic [ref=e175]: 
+                - text: QQ群： 满937441 满887144332 满180251782 满104180207 满186866453 满201396349 满101456076 满101539465 满264312783 满167385320 满104748341 满160110482 满170801498 满108482800 满101046199 满136919097 满143961921 满174951577 满161281055 满138988063 满151450850 满224622315 满287842588 满187944233 满228578329 满191164766 满174569686
+                - link "127358632" [ref=e176] [cursor=pointer]:
+                  - /url: http://qm.qq.com/cgi-bin/qm/qr?_wv=1027&k=M9y5NjAl44lAL_Vh2crmEehZU_PMU6KS&authKey=ZSDz8hEREWSaPuxQV3gEwqGIaGjfRNnkB4rJjf0IvXhrSUGSGwQFmBA%2Boe8HFxyl&noverify=0&group_code=127358632
+              - paragraph [ref=e177]:
+                - generic [ref=e178]: 
+                - text: 微信：
+                - link "/ *若依" [ref=e179] [cursor=pointer]:
+                  - /url: javascript:;
+              - paragraph [ref=e180]:
+                - generic [ref=e181]: 
+                - text: 支付宝：
+                - link "/ *若依" [ref=e182] [cursor=pointer]:
+                  - /url: javascript:;
+          - generic [ref=e184]:
+            - generic [ref=e186]: 更新日志
+            - tablist [ref=e188]:
+              - tab "v3.9.2 - 2026-03-26 " [ref=e190]:
+                - button "v3.9.2 - 2026-03-26 " [ref=e191] [cursor=pointer]:
+                  - text: v3.9.2 - 2026-03-26
+                  - generic [ref=e192]: 
+              - tab "v3.9.1 - 2025-12-18 " [ref=e194]:
+                - button "v3.9.1 - 2025-12-18 " [ref=e195] [cursor=pointer]:
+                  - text: v3.9.1 - 2025-12-18
+                  - generic [ref=e196]: 
+              - tab "v3.9.0 - 2025-05-28 " [ref=e198]:
+                - button "v3.9.0 - 2025-05-28 " [ref=e199] [cursor=pointer]:
+                  - text: v3.9.0 - 2025-05-28
+                  - generic [ref=e200]: 
+              - tab "v3.8.9 - 2024-12-30 " [ref=e202]:
+                - button "v3.8.9 - 2024-12-30 " [ref=e203] [cursor=pointer]:
+                  - text: v3.8.9 - 2024-12-30
+                  - generic [ref=e204]: 
+              - tab "v3.8.8 - 2024-06-30 " [ref=e206]:
+                - button "v3.8.8 - 2024-06-30 " [ref=e207] [cursor=pointer]:
+                  - text: v3.8.8 - 2024-06-30
+                  - generic [ref=e208]: 
+              - tab "v3.8.7 - 2023-12-08 " [ref=e210]:
+                - button "v3.8.7 - 2023-12-08 " [ref=e211] [cursor=pointer]:
+                  - text: v3.8.7 - 2023-12-08
+                  - generic [ref=e212]: 
+              - tab "v3.8.6 - 2023-06-30 " [ref=e214]:
+                - button "v3.8.6 - 2023-06-30 " [ref=e215] [cursor=pointer]:
+                  - text: v3.8.6 - 2023-06-30
+                  - generic [ref=e216]: 
+              - tab "v3.8.5 - 2023-01-01 " [ref=e218]:
+                - button "v3.8.5 - 2023-01-01 " [ref=e219] [cursor=pointer]:
+                  - text: v3.8.5 - 2023-01-01
+                  - generic [ref=e220]: 
+              - tab "v3.8.4 - 2022-09-26 " [ref=e222]:
+                - button "v3.8.4 - 2022-09-26 " [ref=e223] [cursor=pointer]:
+                  - text: v3.8.4 - 2022-09-26
+                  - generic [ref=e224]: 
+              - tab "v3.8.3 - 2022-06-27 " [ref=e226]:
+                - button "v3.8.3 - 2022-06-27 " [ref=e227] [cursor=pointer]:
+                  - text: v3.8.3 - 2022-06-27
+                  - generic [ref=e228]: 
+              - tab "v3.8.2 - 2022-04-01 " [ref=e230]:
+                - button "v3.8.2 - 2022-04-01 " [ref=e231] [cursor=pointer]:
+                  - text: v3.8.2 - 2022-04-01
+                  - generic [ref=e232]: 
+              - tab "v3.8.1 - 2022-01-01 " [ref=e234]:
+                - button "v3.8.1 - 2022-01-01 " [ref=e235] [cursor=pointer]:
+                  - text: v3.8.1 - 2022-01-01
+                  - generic [ref=e236]: 
+              - tab "v3.8.0 - 2021-12-01 " [ref=e238]:
+                - button "v3.8.0 - 2021-12-01 " [ref=e239] [cursor=pointer]:
+                  - text: v3.8.0 - 2021-12-01
+                  - generic [ref=e240]: 
+              - tab "v3.7.0 - 2021-09-13 " [ref=e242]:
+                - button "v3.7.0 - 2021-09-13 " [ref=e243] [cursor=pointer]:
+                  - text: v3.7.0 - 2021-09-13
+                  - generic [ref=e244]: 
+              - tab "v3.6.0 - 2021-07-12 " [ref=e246]:
+                - button "v3.6.0 - 2021-07-12 " [ref=e247] [cursor=pointer]:
+                  - text: v3.6.0 - 2021-07-12
+                  - generic [ref=e248]: 
+              - tab "v3.5.0 - 2021-05-25 " [ref=e250]:
+                - button "v3.5.0 - 2021-05-25 " [ref=e251] [cursor=pointer]:
+                  - text: v3.5.0 - 2021-05-25
+                  - generic [ref=e252]: 
+              - tab "v3.4.0 - 2021-02-22 " [ref=e254]:
+                - button "v3.4.0 - 2021-02-22 " [ref=e255] [cursor=pointer]:
+                  - text: v3.4.0 - 2021-02-22
+                  - generic [ref=e256]: 
+              - tab "v3.3.0 - 2020-12-14 " [ref=e258]:
+                - button "v3.3.0 - 2020-12-14 " [ref=e259] [cursor=pointer]:
+                  - text: v3.3.0 - 2020-12-14
+                  - generic [ref=e260]: 
+              - tab "v3.2.1 - 2020-11-18 " [ref=e262]:
+                - button "v3.2.1 - 2020-11-18 " [ref=e263] [cursor=pointer]:
+                  - text: v3.2.1 - 2020-11-18
+                  - generic [ref=e264]: 
+              - tab "v3.2.0 - 2020-10-10 " [ref=e266]:
+                - button "v3.2.0 - 2020-10-10 " [ref=e267] [cursor=pointer]:
+                  - text: v3.2.0 - 2020-10-10
+                  - generic [ref=e268]: 
+              - tab "v3.1.0 - 2020-08-13 " [ref=e270]:
+                - button "v3.1.0 - 2020-08-13 " [ref=e271] [cursor=pointer]:
+                  - text: v3.1.0 - 2020-08-13
+                  - generic [ref=e272]: 
+              - tab "v3.0.0 - 2020-07-20 " [ref=e274]:
+                - button "v3.0.0 - 2020-07-20 " [ref=e275] [cursor=pointer]:
+                  - text: v3.0.0 - 2020-07-20
+                  - generic [ref=e276]: 
+              - tab "v2.3.0 - 2020-06-01 " [ref=e278]:
+                - button "v2.3.0 - 2020-06-01 " [ref=e279] [cursor=pointer]:
+                  - text: v2.3.0 - 2020-06-01
+                  - generic [ref=e280]: 
+              - tab "v2.2.0 - 2020-03-18 " [ref=e282]:
+                - button "v2.2.0 - 2020-03-18 " [ref=e283] [cursor=pointer]:
+                  - text: v2.2.0 - 2020-03-18
+                  - generic [ref=e284]: 
+              - tab "v2.1.0 - 2020-02-24 " [ref=e286]:
+                - button "v2.1.0 - 2020-02-24 " [ref=e287] [cursor=pointer]:
+                  - text: v2.1.0 - 2020-02-24
+                  - generic [ref=e288]: 
+              - tab "v2.0.0 - 2019-12-02 " [ref=e290]:
+                - button "v2.0.0 - 2019-12-02 " [ref=e291] [cursor=pointer]:
+                  - text: v2.0.0 - 2019-12-02
+                  - generic [ref=e292]: 
+              - tab "v1.1.0 - 2019-11-11 " [ref=e294]:
+                - button "v1.1.0 - 2019-11-11 " [ref=e295] [cursor=pointer]:
+                  - text: v1.1.0 - 2019-11-11
+                  - generic [ref=e296]: 
+              - tab "v1.0.0 - 2019-10-08 " [ref=e298]:
+                - button "v1.0.0 - 2019-10-08 " [ref=e299] [cursor=pointer]:
+                  - text: v1.0.0 - 2019-10-08
+                  - generic [ref=e300]: 
+          - generic [ref=e302]:
+            - generic [ref=e304]: 捐赠支持
+            - generic [ref=e306]:
+              - img "donate" [ref=e307]
+              - generic [ref=e308]: 你可以请作者喝杯咖啡表示鼓励
+  - text: 

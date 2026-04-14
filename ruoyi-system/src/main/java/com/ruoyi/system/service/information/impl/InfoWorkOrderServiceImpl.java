@@ -61,11 +61,11 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
     public int insertInfoWorkOrder(InfoWorkOrder workOrder)
     {
         validateWorkOrderForCreate(workOrder);
-        if (workOrder.getWorkOrderNo() == null || workOrder.getWorkOrderNo().isEmpty())
+        if (StringUtils.isEmpty(workOrder.getWorkOrderNo()))
         {
             workOrder.setWorkOrderNo(generateWorkOrderNo());
         }
-        if (workOrder.getOrderStatus() == null || workOrder.getOrderStatus().isEmpty())
+        if (StringUtils.isEmpty(workOrder.getOrderStatus()))
         {
             workOrder.setOrderStatus("PENDING");
         }
@@ -73,7 +73,7 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
         {
             workOrder.setSubmittedTime(new Date());
         }
-        populateResourceSnapshot(workOrder);
+        populateSubjectSnapshot(workOrder);
         return workOrderMapper.insertInfoWorkOrder(workOrder);
     }
 
@@ -94,7 +94,7 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
             throw new ServiceException("当前工单状态不允许编辑");
         }
         validateWorkOrderForCreate(mergeForValidation(current, workOrder));
-        populateResourceSnapshot(workOrder);
+        populateSubjectSnapshot(workOrder);
         return workOrderMapper.updateInfoWorkOrder(workOrder);
     }
 
@@ -190,7 +190,7 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
 
     private void syncSubjectStatus(InfoWorkOrder workOrder, String targetStatus)
     {
-        String status = (targetStatus == null || targetStatus.isEmpty()) ? defaultStatus(workOrder) : targetStatus;
+        String status = StringUtils.isEmpty(targetStatus) ? defaultStatus(workOrder) : targetStatus;
         if ("PROJECT".equals(workOrder.getDomainType()) && workOrder.getProjectId() != null)
         {
             InfoProject project = projectMapper.selectInfoProjectById(workOrder.getProjectId());
@@ -203,8 +203,9 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
                 }
                 projectMapper.updateInfoProject(project);
             }
+            return;
         }
-        else if ("RESOURCE".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
+        if ("RESOURCE".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
         {
             InfoResource resource = resourceMapper.selectInfoResourceById(workOrder.getSubjectId());
             if (resource != null)
@@ -212,8 +213,9 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
                 resource.setResourceStatus(status);
                 resourceMapper.updateInfoResource(resource);
             }
+            return;
         }
-        else if ("DATA_ASSET".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
+        if ("DATA_ASSET".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
         {
             InfoDataAsset asset = dataAssetMapper.selectInfoDataAssetById(workOrder.getSubjectId());
             if (asset != null)
@@ -221,8 +223,9 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
                 asset.setAssetStatus(status);
                 dataAssetMapper.updateInfoDataAsset(asset);
             }
+            return;
         }
-        else if ("NETWORK".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
+        if ("NETWORK".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
         {
             InfoNetworkResource network = networkResourceMapper.selectInfoNetworkResourceById(workOrder.getSubjectId());
             if (network != null)
@@ -259,6 +262,11 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
         if ("RESOURCE".equals(workOrder.getDomainType()))
         {
             validateResourceWorkOrder(workOrder);
+            return;
+        }
+        if ("PROJECT".equals(workOrder.getDomainType()))
+        {
+            validateProjectWorkOrder(workOrder);
         }
     }
 
@@ -268,7 +276,9 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
         {
             throw new ServiceException("工单类型不能为空");
         }
-        if (!"APPLY".equals(workOrder.getRequestType()) && !"CHANGE".equals(workOrder.getRequestType()) && !"RECYCLE".equals(workOrder.getRequestType()))
+        if (!"APPLY".equals(workOrder.getRequestType())
+            && !"CHANGE".equals(workOrder.getRequestType())
+            && !"RECYCLE".equals(workOrder.getRequestType()))
         {
             throw new ServiceException("资源工单类型仅支持 APPLY、CHANGE、RECYCLE");
         }
@@ -290,35 +300,80 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
             {
                 throw new ServiceException("资源申请工单必须关联项目");
             }
+            return;
         }
-        else
+
+        if (workOrder.getSubjectId() == null)
         {
-            if (workOrder.getSubjectId() == null)
-            {
-                throw new ServiceException("变更或回收工单必须关联资源");
-            }
-            InfoResource resource = resourceMapper.selectInfoResourceById(workOrder.getSubjectId());
-            if (resource == null)
-            {
-                throw new ServiceException("目标资源不存在");
-            }
-            if ("RECYCLED".equals(resource.getResourceStatus()) && "CHANGE".equals(workOrder.getRequestType()))
-            {
-                throw new ServiceException("已回收资源不允许发起变更");
-            }
-            if ("RECYCLE".equals(workOrder.getRequestType()) && "RECYCLED".equals(resource.getResourceStatus()))
-            {
-                throw new ServiceException("已回收资源不允许重复回收");
-            }
+            throw new ServiceException("变更或回收工单必须关联资源");
+        }
+        InfoResource resource = resourceMapper.selectInfoResourceById(workOrder.getSubjectId());
+        if (resource == null)
+        {
+            throw new ServiceException("目标资源不存在");
+        }
+        if ("RECYCLED".equals(resource.getResourceStatus()) && "CHANGE".equals(workOrder.getRequestType()))
+        {
+            throw new ServiceException("已回收资源不允许发起变更");
+        }
+        if ("RECYCLE".equals(workOrder.getRequestType()) && "RECYCLED".equals(resource.getResourceStatus()))
+        {
+            throw new ServiceException("已回收资源不允许重复回收");
+        }
+    }
+
+    private void validateProjectWorkOrder(InfoWorkOrder workOrder)
+    {
+        if (!"ACCEPTANCE".equals(workOrder.getRequestType()))
+        {
+            throw new ServiceException("项目工单类型仅支持 ACCEPTANCE");
+        }
+        if (workOrder.getProjectId() == null)
+        {
+            throw new ServiceException("项目验收工单必须关联项目");
+        }
+        if (StringUtils.isEmpty(workOrder.getRequestTitle()))
+        {
+            throw new ServiceException("工单标题不能为空");
+        }
+        if (StringUtils.isEmpty(workOrder.getApplicantName()))
+        {
+            throw new ServiceException("申请人不能为空");
+        }
+        InfoProject project = projectMapper.selectInfoProjectById(workOrder.getProjectId());
+        if (project == null)
+        {
+            throw new ServiceException("目标项目不存在");
+        }
+        if (workOrder.getSubjectId() == null)
+        {
+            workOrder.setSubjectId(workOrder.getProjectId());
+        }
+        if (StringUtils.isEmpty(workOrder.getSubjectType()))
+        {
+            workOrder.setSubjectType("PROJECT");
+        }
+        if (StringUtils.isEmpty(workOrder.getSubjectName()))
+        {
+            workOrder.setSubjectName(project.getProjectName());
+        }
+    }
+
+    private void populateSubjectSnapshot(InfoWorkOrder workOrder)
+    {
+        if ("RESOURCE".equals(workOrder.getDomainType()) && workOrder.getSubjectId() != null)
+        {
+            populateResourceSnapshot(workOrder);
+            return;
+        }
+        if ("PROJECT".equals(workOrder.getDomainType()) && workOrder.getProjectId() != null)
+        {
+            populateProjectSnapshot(workOrder);
         }
     }
 
     private void populateResourceSnapshot(InfoWorkOrder workOrder)
     {
-        if (!"RESOURCE".equals(workOrder.getDomainType()) || workOrder.getSubjectId() == null)
-        {
-            return;
-        }
         InfoResource resource = resourceMapper.selectInfoResourceById(workOrder.getSubjectId());
         if (resource == null)
         {
@@ -331,6 +386,31 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
         if (StringUtils.isEmpty(workOrder.getCurrentSnapshotJson()))
         {
             workOrder.setCurrentSnapshotJson(buildResourceSnapshot(resource));
+        }
+    }
+
+    private void populateProjectSnapshot(InfoWorkOrder workOrder)
+    {
+        InfoProject project = projectMapper.selectInfoProjectById(workOrder.getProjectId());
+        if (project == null)
+        {
+            return;
+        }
+        if (workOrder.getSubjectId() == null)
+        {
+            workOrder.setSubjectId(project.getProjectId());
+        }
+        if (StringUtils.isEmpty(workOrder.getSubjectType()))
+        {
+            workOrder.setSubjectType("PROJECT");
+        }
+        if (StringUtils.isEmpty(workOrder.getSubjectName()))
+        {
+            workOrder.setSubjectName(project.getProjectName());
+        }
+        if (StringUtils.isEmpty(workOrder.getCurrentSnapshotJson()))
+        {
+            workOrder.setCurrentSnapshotJson(buildProjectSnapshot(project));
         }
     }
 
@@ -368,6 +448,8 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
         merged.setRequestType(StringUtils.isEmpty(updates.getRequestType()) ? current.getRequestType() : updates.getRequestType());
         merged.setProjectId(updates.getProjectId() == null ? current.getProjectId() : updates.getProjectId());
         merged.setSubjectId(updates.getSubjectId() == null ? current.getSubjectId() : updates.getSubjectId());
+        merged.setSubjectType(StringUtils.isEmpty(updates.getSubjectType()) ? current.getSubjectType() : updates.getSubjectType());
+        merged.setSubjectName(StringUtils.isEmpty(updates.getSubjectName()) ? current.getSubjectName() : updates.getSubjectName());
         merged.setRequestTitle(StringUtils.isEmpty(updates.getRequestTitle()) ? current.getRequestTitle() : updates.getRequestTitle());
         merged.setApplicantName(StringUtils.isEmpty(updates.getApplicantName()) ? current.getApplicantName() : updates.getApplicantName());
         merged.setRequestReason(StringUtils.isEmpty(updates.getRequestReason()) ? current.getRequestReason() : updates.getRequestReason());
@@ -388,6 +470,18 @@ public class InfoWorkOrderServiceImpl implements IInfoWorkOrderService
             safe(resource.getOwnerName()),
             safe(resource.getMaintainerName()),
             safe(resource.getIpAddress()));
+    }
+
+    private String buildProjectSnapshot(InfoProject project)
+    {
+        return String.format(
+            "{\"projectId\":%d,\"projectCode\":\"%s\",\"projectName\":\"%s\",\"projectStatus\":\"%s\",\"projectPhase\":\"%s\",\"acceptanceStatus\":\"%s\"}",
+            project.getProjectId(),
+            safe(project.getProjectCode()),
+            safe(project.getProjectName()),
+            safe(project.getProjectStatus()),
+            safe(project.getProjectPhase()),
+            safe(project.getAcceptanceStatus()));
     }
 
     private String safe(String value)

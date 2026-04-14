@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.information.InfoProjectPermissionRelMapper">
+
+    <sql id="selectPermissionColumns">
+        select p.permission_id as permissionId,
+               p.project_id as projectId,
+               pr.project_name as projectName,
+               p.scope_type as scopeType,
+               p.scope_id as scopeId,
+               p.target_type as targetType,
+               p.target_key as targetKey,
+               p.can_view as canView,
+               p.can_edit as canEdit,
+               p.can_download as canDownload,
+               p.can_delete as canDelete,
+               p.inherit_flag as inheritFlag,
+               p.start_time as startTime,
+               p.end_time as endTime,
+               p.create_by as createBy,
+               p.create_time as createTime,
+               p.update_by as updateBy,
+               p.update_time as updateTime,
+               p.remark
+        from inf_project_permission_rel p
+        left join inf_project pr on pr.project_id = p.project_id
+    </sql>
+
+    <select id="selectInfoProjectPermissionById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoProjectPermissionRel">
+        <include refid="selectPermissionColumns"/>
+        where p.permission_id = #{permissionId}
+    </select>
+
+    <select id="selectInfoProjectPermissionList" parameterType="com.ruoyi.system.domain.information.InfoProjectPermissionRel" resultType="com.ruoyi.system.domain.information.InfoProjectPermissionRel">
+        <include refid="selectPermissionColumns"/>
+        <where>
+            <if test="projectId != null">and p.project_id = #{projectId}</if>
+            <if test="scopeType != null and scopeType != ''">and p.scope_type = #{scopeType}</if>
+            <if test="scopeId != null">and p.scope_id = #{scopeId}</if>
+            <if test="targetType != null and targetType != ''">and p.target_type = #{targetType}</if>
+            <if test="targetKey != null and targetKey != ''">and p.target_key like concat('%', #{targetKey}, '%')</if>
+        </where>
+        order by p.permission_id desc
+    </select>
+
+    <select id="countByProjectId" parameterType="Long" resultType="int">
+        select count(1)
+        from inf_project_permission_rel
+        where project_id = #{projectId}
+    </select>
+
+    <select id="countDuplicate" parameterType="com.ruoyi.system.domain.information.InfoProjectPermissionRel" resultType="int">
+        select count(1)
+        from inf_project_permission_rel
+        where project_id = #{projectId}
+          and scope_type = #{scopeType}
+          and target_type = #{targetType}
+          and target_key = #{targetKey}
+          and (
+                (scope_id is null and #{scopeId} is null)
+                or scope_id = #{scopeId}
+              )
+    </select>
+
+    <insert id="insertInfoProjectPermission" parameterType="com.ruoyi.system.domain.information.InfoProjectPermissionRel" useGeneratedKeys="true" keyProperty="permissionId">
+        insert into inf_project_permission_rel (
+            project_id, scope_type, scope_id, target_type, target_key, can_view, can_edit, can_download, can_delete,
+            inherit_flag, start_time, end_time, create_by, create_time, remark
+        ) values (
+            #{projectId}, #{scopeType}, #{scopeId}, #{targetType}, #{targetKey}, #{canView}, #{canEdit}, #{canDownload}, #{canDelete},
+            #{inheritFlag}, #{startTime}, #{endTime}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoProjectPermission" parameterType="com.ruoyi.system.domain.information.InfoProjectPermissionRel">
+        update inf_project_permission_rel
+        <set>
+            <if test="canView != null">can_view = #{canView},</if>
+            <if test="canEdit != null">can_edit = #{canEdit},</if>
+            <if test="canDownload != null">can_download = #{canDownload},</if>
+            <if test="canDelete != null">can_delete = #{canDelete},</if>
+            <if test="inheritFlag != null">inherit_flag = #{inheritFlag},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where permission_id = #{permissionId}
+    </update>
+
+    <delete id="deleteInfoProjectPermissionById" parameterType="Long">
+        delete from inf_project_permission_rel where permission_id = #{permissionId}
+    </delete>
+</mapper>

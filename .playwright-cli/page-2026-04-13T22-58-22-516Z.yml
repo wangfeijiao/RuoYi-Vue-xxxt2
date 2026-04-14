@@ -1,0 +1,334 @@
+- generic [ref=e2]:
+  - generic [ref=e29]:
+    - generic [ref=e30]:
+      - link "若依管理系统" [ref=e32] [cursor=pointer]:
+        - /url: /
+        - img [ref=e33]
+        - heading "若依管理系统" [level=1] [ref=e34]
+      - menubar [ref=e38]:
+        - link "首页" [ref=e40] [cursor=pointer]:
+          - /url: /index
+          - menuitem "首页" [ref=e41]:
+            - img [ref=e42]
+            - text: 首页
+        - menuitem "系统管理 " [ref=e45]:
+          - generic [ref=e46] [cursor=pointer]:
+            - img [ref=e47]
+            - text: 系统管理
+            - generic [ref=e49]: 
+          - text: 
+        - menuitem "系统监控 " [ref=e51]:
+          - generic [ref=e52] [cursor=pointer]:
+            - img [ref=e53]
+            - text: 系统监控
+            - generic [ref=e55]: 
+        - menuitem "系统工具 " [ref=e57]:
+          - generic [ref=e58] [cursor=pointer]:
+            - img [ref=e59]
+            - text: 系统工具
+            - generic [ref=e61]: 
+        - menuitem "信息化管理 " [expanded] [ref=e63]:
+          - generic [ref=e64] [cursor=pointer]:
+            - img [ref=e65]
+            - text: 信息化管理
+            - generic [ref=e67]: 
+          - menu [ref=e309]:
+            - link "总览看板" [ref=e311] [cursor=pointer]:
+              - /url: /information/dashboard
+              - menuitem "总览看板" [ref=e312]:
+                - img [ref=e313]
+                - text: 总览看板
+            - link "项目管理" [ref=e316] [cursor=pointer]:
+              - /url: /information/project
+              - menuitem "项目管理" [ref=e317]:
+                - img [ref=e318]
+                - text: 项目管理
+            - link "IT资源管理" [ref=e321] [cursor=pointer]:
+              - /url: /information/resource
+              - menuitem "IT资源管理" [ref=e322]:
+                - img [ref=e323]
+                - text: IT资源管理
+            - link "应用管理" [ref=e326] [cursor=pointer]:
+              - /url: /information/application
+              - menuitem "应用管理" [active] [ref=e327]:
+                - img [ref=e328]
+                - text: 应用管理
+            - link "数据资源管理" [ref=e331] [cursor=pointer]:
+              - /url: /information/dataAsset
+              - menuitem "数据资源管理" [ref=e332]:
+                - img [ref=e333]
+                - text: 数据资源管理
+            - link "网络安全管理" [ref=e336] [cursor=pointer]:
+              - /url: /information/network
+              - menuitem "网络安全管理" [ref=e337]:
+                - img [ref=e338]
+                - text: 网络安全管理
+        - link "若依官网" [ref=e69] [cursor=pointer]:
+          - /url: http://ruoyi.vip
+          - menuitem "若依官网" [ref=e70]:
+            - img [ref=e71]
+            - text: 若依官网
+    - generic [ref=e74]:
+      - generic [ref=e75]:
+        - generic [ref=e76]:
+          - img [ref=e78] [cursor=pointer]
+          - navigation "Breadcrumb" [ref=e80]:
+            - generic:
+              - generic [ref=e81]:
+                - link "首页" [ref=e82]
+                - text: /
+              - generic [ref=e340]:
+                - link "信息化管理" [ref=e341]
+                - text: /
+              - link "应用管理" [ref=e343]
+          - generic [ref=e83]:
+            - img [ref=e85] [cursor=pointer]
+            - img [ref=e88] [cursor=pointer]
+            - img [ref=e91] [cursor=pointer]
+            - img [ref=e94] [cursor=pointer]
+            - button [ref=e97] [cursor=pointer]:
+              - img [ref=e98]
+            - generic [ref=e100] [cursor=pointer]:
+              - generic [ref=e101]:
+                - img [ref=e102]
+                - generic: "3"
+              - text: 
+            - button "若依" [ref=e105] [cursor=pointer]:
+              - img [ref=e106]
+              - text: 若依
+        - generic [ref=e107]:
+          - generic [ref=e109]: 
+          - generic [ref=e112]:
+            - generic [ref=e113] [cursor=pointer]: 首页
+            - generic [ref=e344] [cursor=pointer]:
+              - text: 应用管理
+              - generic [ref=e345]: 
+          - generic [ref=e117]: 
+          - generic [ref=e118]:
+            - button "" [ref=e119] [cursor=pointer]:
+              - generic [ref=e120]: 
+            - text:      
+          - generic "刷新页面" [ref=e121] [cursor=pointer]:
+            - generic [ref=e122]: 
+            - text: 刷新
+          - text:    
+      - generic [ref=e346]:
+        - generic [ref=e347]:
+          - generic [ref=e350]:
+            - generic [ref=e351]: 应用总数
+            - generic [ref=e352]: "2"
+          - generic [ref=e355]:
+            - generic [ref=e356]: 运行中
+            - generic [ref=e357]: "2"
+          - generic [ref=e360]:
+            - generic [ref=e361]: 建设中
+            - generic [ref=e362]: "0"
+          - generic [ref=e365]:
+            - generic [ref=e366]: 告警应用
+            - generic [ref=e367]: "1"
+          - generic [ref=e370]:
+            - generic [ref=e371]: 联动正常
+            - generic [ref=e372]: "1"
+          - generic [ref=e375]:
+            - generic [ref=e376]: 联动风险
+            - generic [ref=e377]: "1"
+        - generic [ref=e378]:
+          - generic [ref=e379]:
+            - generic [ref=e380]: 应用编码
+            - textbox "请输入应用编码" [ref=e383]
+          - generic [ref=e384]:
+            - generic [ref=e385]: 应用名称
+            - textbox "请输入应用名称" [ref=e388]
+          - generic [ref=e389]:
+            - generic [ref=e390]: 建设来源
+            - generic [ref=e393]:
+              - textbox "请选择" [ref=e394] [cursor=pointer]
+              - generic [ref=e396] [cursor=pointer]: 
+          - generic [ref=e397]:
+            - generic [ref=e398]: 业务状态
+            - generic [ref=e401]:
+              - textbox "请选择" [ref=e402] [cursor=pointer]
+              - generic [ref=e404] [cursor=pointer]: 
+          - generic [ref=e405]:
+            - generic [ref=e406]: 联动状态
+            - generic [ref=e409]:
+              - textbox "请选择" [ref=e410] [cursor=pointer]
+              - generic [ref=e412] [cursor=pointer]: 
+          - generic [ref=e413]:
+            - generic [ref=e414]: 责任人
+            - textbox "请输入责任人" [ref=e417]
+          - generic [ref=e419]:
+            - button " 搜索" [ref=e420] [cursor=pointer]:
+              - generic [ref=e421]: 
+              - text: 搜索
+            - button " 重置" [ref=e422] [cursor=pointer]:
+              - generic [ref=e423]: 
+              - text: 重置
+        - generic [ref=e424]:
+          - button " 新增" [ref=e426] [cursor=pointer]:
+            - generic [ref=e427]: 
+            - text: 新增
+          - button " 修改" [disabled] [ref=e429]:
+            - generic [ref=e430]: 
+            - text: 修改
+          - button " 删除" [disabled] [ref=e432]:
+            - generic [ref=e433]: 
+            - text: 删除
+          - button " 详情" [disabled] [ref=e435]:
+            - generic [ref=e436]: 
+            - text: 详情
+          - button " 重算状态" [disabled] [ref=e438]:
+            - generic [ref=e439]: 
+            - text: 重算状态
+        - generic [ref=e440]:
+          - table [ref=e442]:
+            - rowgroup [ref=e456]:
+              - row "应用编码 应用名称 应用类型 建设来源 业务状态 联动状态 开放告警 责任人 关联项目 访问地址" [ref=e457]:
+                - columnheader [ref=e458]:
+                  - generic [ref=e461] [cursor=pointer]:
+                    - checkbox
+                - columnheader "应用编码" [ref=e463]:
+                  - generic [ref=e464]: 应用编码
+                - columnheader "应用名称" [ref=e465]:
+                  - generic [ref=e466]: 应用名称
+                - columnheader "应用类型" [ref=e467]:
+                  - generic [ref=e468]: 应用类型
+                - columnheader "建设来源" [ref=e469]:
+                  - generic [ref=e470]: 建设来源
+                - columnheader "业务状态" [ref=e471]:
+                  - generic [ref=e472]: 业务状态
+                - columnheader "联动状态" [ref=e473]:
+                  - generic [ref=e474]: 联动状态
+                - columnheader "开放告警" [ref=e475]:
+                  - generic [ref=e476]: 开放告警
+                - columnheader "责任人" [ref=e477]:
+                  - generic [ref=e478]: 责任人
+                - columnheader "关联项目" [ref=e479]:
+                  - generic [ref=e480]: 关联项目
+                - columnheader "访问地址" [ref=e481]:
+                  - generic [ref=e482]: 访问地址
+                - columnheader [ref=e483]
+          - table [ref=e485]:
+            - rowgroup [ref=e499]:
+              - row "APP-2026-NETFLOW ?????????? PORTAL 自建 运行中 正常 0 admin 智慧园区资源整合项目 https://park.example.com/portal" [ref=e500]:
+                - cell [ref=e501]:
+                  - generic [ref=e504] [cursor=pointer]:
+                    - checkbox
+                - cell "APP-2026-NETFLOW" [ref=e506]:
+                  - generic [ref=e507]: APP-2026-NETFLOW
+                - cell "??????????" [ref=e508]:
+                  - generic [ref=e509]: "??????????"
+                - cell "PORTAL" [ref=e510]:
+                  - generic [ref=e511]: PORTAL
+                - cell "自建" [ref=e512]:
+                  - generic [ref=e513]: 自建
+                - cell "运行中" [ref=e514]:
+                  - generic [ref=e516]: 运行中
+                - cell "正常" [ref=e517]:
+                  - generic [ref=e519]: 正常
+                - cell "0" [ref=e520]:
+                  - generic [ref=e521]: "0"
+                - cell "admin" [ref=e522]:
+                  - generic [ref=e523]: admin
+                - cell "智慧园区资源整合项目" [ref=e524]:
+                  - generic [ref=e525]: 智慧园区资源整合项目
+                - cell "https://park.example.com/portal" [ref=e526]:
+                  - generic [ref=e527]: https://park.example.com/portal
+                - cell [ref=e528]
+              - row "APP-2026-SMARTPARK 智慧园区统一门户 PORTAL 自建 运行中 风险 1 王超 智慧园区资源整合项目 https://portal.smartpark.local" [ref=e529]:
+                - cell [ref=e530]:
+                  - generic [ref=e533] [cursor=pointer]:
+                    - checkbox
+                - cell "APP-2026-SMARTPARK" [ref=e535]:
+                  - generic [ref=e536]: APP-2026-SMARTPARK
+                - cell "智慧园区统一门户" [ref=e537]:
+                  - generic [ref=e538]: 智慧园区统一门户
+                - cell "PORTAL" [ref=e539]:
+                  - generic [ref=e540]: PORTAL
+                - cell "自建" [ref=e541]:
+                  - generic [ref=e542]: 自建
+                - cell "运行中" [ref=e543]:
+                  - generic [ref=e545]: 运行中
+                - cell "风险" [ref=e546]:
+                  - generic [ref=e548]: 风险
+                - cell "1" [ref=e549]:
+                  - generic [ref=e550]: "1"
+                - cell "王超" [ref=e551]:
+                  - generic [ref=e552]: 王超
+                - cell "智慧园区资源整合项目" [ref=e553]:
+                  - generic [ref=e554]: 智慧园区资源整合项目
+                - cell "https://portal.smartpark.local" [ref=e555]:
+                  - generic [ref=e556]: https://portal.smartpark.local
+                - cell [ref=e557]
+          - generic [ref=e558]:
+            - table [ref=e560]:
+              - rowgroup [ref=e574]:
+                - row "操作" [ref=e575]:
+                  - columnheader [ref=e576]
+                  - columnheader [ref=e577]
+                  - columnheader [ref=e578]
+                  - columnheader [ref=e579]
+                  - columnheader [ref=e580]
+                  - columnheader [ref=e581]
+                  - columnheader [ref=e582]
+                  - columnheader [ref=e583]
+                  - columnheader [ref=e584]
+                  - columnheader [ref=e585]
+                  - columnheader [ref=e586]
+                  - columnheader "操作" [ref=e587]:
+                    - generic [ref=e588]: 操作
+            - table [ref=e590]:
+              - rowgroup [ref=e604]:
+                - row "详情 修改 重算 删除" [ref=e605]:
+                  - cell [ref=e606]
+                  - cell [ref=e607]
+                  - cell [ref=e608]
+                  - cell [ref=e609]
+                  - cell [ref=e610]
+                  - cell [ref=e611]
+                  - cell [ref=e612]
+                  - cell [ref=e613]
+                  - cell [ref=e614]
+                  - cell [ref=e615]
+                  - cell [ref=e616]
+                  - cell "详情 修改 重算 删除" [ref=e617]:
+                    - generic [ref=e618]:
+                      - button "详情" [ref=e619] [cursor=pointer]
+                      - button "修改" [ref=e620] [cursor=pointer]
+                      - button "重算" [ref=e621] [cursor=pointer]
+                      - button "删除" [ref=e622] [cursor=pointer]
+                - row "详情 修改 重算 删除" [ref=e623]:
+                  - cell [ref=e624]
+                  - cell [ref=e625]
+                  - cell [ref=e626]
+                  - cell [ref=e627]
+                  - cell [ref=e628]
+                  - cell [ref=e629]
+                  - cell [ref=e630]
+                  - cell [ref=e631]
+                  - cell [ref=e632]
+                  - cell [ref=e633]
+                  - cell [ref=e634]
+                  - cell "详情 修改 重算 删除" [ref=e635]:
+                    - generic [ref=e636]:
+                      - button "详情" [ref=e637] [cursor=pointer]
+                      - button "修改" [ref=e638] [cursor=pointer]
+                      - button "重算" [ref=e639] [cursor=pointer]
+                      - button "删除" [ref=e640] [cursor=pointer]
+        - generic [ref=e642]:
+          - generic [ref=e643]: 共 2 条
+          - generic [ref=e646]:
+            - textbox "请选择" [ref=e647] [cursor=pointer]: 10条/页
+            - generic [ref=e649] [cursor=pointer]: 
+          - button "" [disabled] [ref=e650]:
+            - generic [ref=e651]: 
+          - list [ref=e652]:
+            - listitem [ref=e653]: "1"
+          - button "" [disabled] [ref=e654]:
+            - generic [ref=e655]: 
+          - generic [ref=e656]:
+            - text: 前往
+            - spinbutton [ref=e658]: "1"
+            - text: 页
+        - text:   
+  - text: 

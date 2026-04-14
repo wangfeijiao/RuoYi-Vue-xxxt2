@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.system.domain.information.InfoApproveBody;
 import com.ruoyi.system.domain.information.InfoExecuteBody;
+import com.ruoyi.system.domain.information.InfoProject;
 import com.ruoyi.system.domain.information.InfoResource;
 import com.ruoyi.system.domain.information.InfoWorkOrder;
 import com.ruoyi.system.mapper.information.InfoDataAssetMapper;
@@ -136,5 +137,48 @@ public class InfoWorkOrderServiceImplTest
         workOrder.setRequestReason("unused");
 
         assertThrows(ServiceException.class, () -> service.insertInfoWorkOrder(workOrder));
+    }
+
+    @Test
+    public void shouldRejectProjectWorkOrderWhenRequestTypeIsNotAcceptance()
+    {
+        InfoWorkOrder workOrder = new InfoWorkOrder();
+        workOrder.setDomainType("PROJECT");
+        workOrder.setRequestType("CHANGE");
+        workOrder.setProjectId(10L);
+        workOrder.setRequestTitle("项目结项");
+        workOrder.setApplicantName("user1");
+        workOrder.setRequestReason("测试");
+
+        assertThrows(ServiceException.class, () -> service.insertInfoWorkOrder(workOrder));
+    }
+
+    @Test
+    public void shouldPrepareProjectAcceptanceWorkOrderDefaultsOnCreate()
+    {
+        InfoWorkOrder workOrder = new InfoWorkOrder();
+        workOrder.setDomainType("PROJECT");
+        workOrder.setRequestType("ACCEPTANCE");
+        workOrder.setProjectId(10L);
+        workOrder.setRequestTitle("项目验收");
+        workOrder.setApplicantName("user1");
+        workOrder.setRequestReason("材料齐备");
+
+        InfoProject project = new InfoProject();
+        project.setProjectId(10L);
+        project.setProjectName("智慧园区项目");
+        when(projectMapper.selectInfoProjectById(10L)).thenReturn(project);
+        when(workOrderMapper.insertInfoWorkOrder(any(InfoWorkOrder.class))).thenReturn(1);
+
+        int rows = service.insertInfoWorkOrder(workOrder);
+
+        assertEquals(1, rows);
+        ArgumentCaptor<InfoWorkOrder> captor = ArgumentCaptor.forClass(InfoWorkOrder.class);
+        verify(workOrderMapper).insertInfoWorkOrder(captor.capture());
+        InfoWorkOrder saved = captor.getValue();
+        assertEquals(Long.valueOf(10L), saved.getSubjectId());
+        assertEquals("PROJECT", saved.getSubjectType());
+        assertEquals("智慧园区项目", saved.getSubjectName());
+        assertEquals("PENDING", saved.getOrderStatus());
     }
 }

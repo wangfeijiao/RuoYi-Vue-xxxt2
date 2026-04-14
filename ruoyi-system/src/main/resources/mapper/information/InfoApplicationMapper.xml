@@ -5,44 +5,126 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.ruoyi.system.mapper.information.InfoApplicationMapper">
 
     <sql id="selectApplicationColumns">
-        select a.application_id as applicationId, a.application_code as applicationCode, a.application_name as applicationName,
-               a.application_type as applicationType, a.classification_level as classificationLevel, a.application_status as applicationStatus,
-               a.project_id as projectId, p.project_name as projectName, a.owner_org as ownerOrg, a.owner_name as ownerName,
-               a.vendor_name as vendorName, a.vendor_owner as vendorOwner, a.portal_owner as portalOwner,
-               a.resource_owner as resourceOwner, a.data_owner as dataOwner, a.security_owner as securityOwner,
-               a.access_url as accessUrl, a.tech_stack as techStack, a.resource_summary as resourceSummary,
-               a.network_summary as networkSummary, a.relation_summary as relationSummary,
-               a.create_by as createBy, a.create_time as createTime, a.update_by as updateBy, a.update_time as updateTime, a.remark
-        from inf_application a
-        left join inf_project p on a.project_id = p.project_id
+        select a.application_id as applicationId,
+               a.application_code as applicationCode,
+               a.application_name as applicationName,
+               a.application_type as applicationType,
+               a.classification_level as classificationLevel,
+               a.construction_source as constructionSource,
+               a.application_status as applicationStatus,
+               a.linkage_status as linkageStatus,
+               a.last_alert_time as lastAlertTime,
+               a.project_id as projectId,
+               p.project_name as projectName,
+               a.owner_org as ownerOrg,
+               a.owner_dept_id as ownerDeptId,
+               a.owner_name as ownerName,
+               a.ops_owner as opsOwner,
+               a.vendor_name as vendorName,
+               a.vendor_owner as vendorOwner,
+               a.portal_owner as portalOwner,
+               a.resource_owner as resourceOwner,
+               a.data_owner as dataOwner,
+               a.security_owner as securityOwner,
+               a.access_url as accessUrl,
+               a.tech_stack as techStack,
+               a.resource_summary as resourceSummary,
+               a.network_summary as networkSummary,
+               a.relation_summary as relationSummary,
+               a.deleted_flag as deletedFlag,
+               case when ifnull(alert.open_alert_count, 0) &gt; 0 then '1' else '0' end as hasOpenAlert,
+               ifnull(alert.open_alert_count, 0) as openAlertCount,
+               a.create_by as createBy,
+               a.create_time as createTime,
+               a.update_by as updateBy,
+               a.update_time as updateTime,
+               a.remark
+          from inf_application a
+          left join inf_project p on a.project_id = p.project_id
+          left join (
+                select application_id, count(1) as open_alert_count
+                  from inf_application_alert_event
+                 where event_status in ('OPEN', 'ACKED')
+                 group by application_id
+          ) alert on a.application_id = alert.application_id
+    </sql>
+
+    <sql id="dependencyRuntimeStatusExpr">
+        case
+            when d.dependency_type = 'RESOURCE' then
+                case
+                    when r.resource_id is null then ifnull(d.dependency_status, 'UNKNOWN')
+                    when r.monitor_status = 'CRITICAL' or r.resource_status = 'RECYCLED' then 'BLOCKED'
+                    when r.monitor_status = 'WARNING' then 'RISK'
+                    when r.monitor_status = 'NORMAL' and r.resource_status in ('IDLE', 'IN_USE', 'CHANGING', 'PENDING_DELIVERY') then 'NORMAL'
+                    else ifnull(d.dependency_status, 'UNKNOWN')
+                end
+            when d.dependency_type = 'NETWORK' then
+                case
+                    when n.network_id is null then ifnull(d.dependency_status, 'UNKNOWN')
+                    when n.security_status = 'CRITICAL' or n.resource_status = 'RECYCLED' then 'BLOCKED'
+                    when n.security_status = 'WARNING' then 'RISK'
+                    when n.security_status = 'NORMAL' and n.resource_status in ('IDLE', 'IN_USE', 'ALLOCATED') then 'NORMAL'
+                    else ifnull(d.dependency_status, 'UNKNOWN')
+                end
+            when d.dependency_type = 'PROJECT' then
+                case
+                    when p.project_id is null then ifnull(d.dependency_status, 'UNKNOWN')
+                    when p.project_status in ('RUNNING', 'COMPLETED') then 'NORMAL'
+                    when p.project_status in ('DRAFT', 'PENDING_ACCEPTANCE') then 'RISK'
+                    else ifnull(d.dependency_status, 'UNKNOWN')
+                end
+            when d.dependency_type = 'APPLICATION' then
+                case
+                    when app.application_id is null then ifnull(d.dependency_status, 'UNKNOWN')
+                    when app.linkage_status in ('BLOCKED', 'RISK') then app.linkage_status
+                    when app.application_status = 'ALERT' then 'RISK'
+                    when app.linkage_status is not null and app.linkage_status != '' then app.linkage_status
+                    else ifnull(d.dependency_status, 'UNKNOWN')
+                end
+            else ifnull(d.dependency_status, 'UNKNOWN')
+        end
     </sql>
 
     <select id="selectInfoApplicationById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplication">
         <include refid="selectApplicationColumns"/>
         where a.application_id = #{applicationId}
+          and a.deleted_flag = '0'
     </select>
 
     <select id="selectInfoApplicationList" parameterType="com.ruoyi.system.domain.information.InfoApplication" resultType="com.ruoyi.system.domain.information.InfoApplication">
         <include refid="selectApplicationColumns"/>
         <where>
+            a.deleted_flag = '0'
             <if test="applicationCode != null and applicationCode != ''">and a.application_code like concat('%', #{applicationCode}, '%')</if>
             <if test="applicationName != null and applicationName != ''">and a.application_name like concat('%', #{applicationName}, '%')</if>
             <if test="applicationType != null and applicationType != ''">and a.application_type = #{applicationType}</if>
             <if test="classificationLevel != null and classificationLevel != ''">and a.classification_level = #{classificationLevel}</if>
+            <if test="constructionSource != null and constructionSource != ''">and a.construction_source = #{constructionSource}</if>
             <if test="applicationStatus != null and applicationStatus != ''">and a.application_status = #{applicationStatus}</if>
+            <if test="linkageStatus != null and linkageStatus != ''">and a.linkage_status = #{linkageStatus}</if>
+            <if test="projectId != null">and a.project_id = #{projectId}</if>
+            <if test="ownerOrg != null and ownerOrg != ''">and a.owner_org like concat('%', #{ownerOrg}, '%')</if>
+            <if test="ownerName != null and ownerName != ''">and a.owner_name like concat('%', #{ownerName}, '%')</if>
+            <if test="opsOwner != null and opsOwner != ''">and a.ops_owner like concat('%', #{opsOwner}, '%')</if>
+            <if test="hasOpenAlert != null and hasOpenAlert != ''">
+                and case when ifnull(alert.open_alert_count, 0) &gt; 0 then '1' else '0' end = #{hasOpenAlert}
+            </if>
         </where>
         order by a.application_id desc
     </select>
 
     <insert id="insertInfoApplication" parameterType="com.ruoyi.system.domain.information.InfoApplication" useGeneratedKeys="true" keyProperty="applicationId">
         insert into inf_application (
-            application_code, application_name, application_type, classification_level, application_status, project_id, owner_org,
-            owner_name, vendor_name, vendor_owner, portal_owner, resource_owner, data_owner, security_owner, access_url,
-            tech_stack, resource_summary, network_summary, relation_summary, create_by, create_time, remark
+            application_code, application_name, application_type, classification_level, construction_source, application_status,
+            linkage_status, last_alert_time, project_id, owner_org, owner_dept_id, owner_name, ops_owner, vendor_name,
+            vendor_owner, portal_owner, resource_owner, data_owner, security_owner, access_url, tech_stack, resource_summary,
+            network_summary, relation_summary, deleted_flag, create_by, create_time, remark
         ) values (
-            #{applicationCode}, #{applicationName}, #{applicationType}, #{classificationLevel}, #{applicationStatus}, #{projectId}, #{ownerOrg},
-            #{ownerName}, #{vendorName}, #{vendorOwner}, #{portalOwner}, #{resourceOwner}, #{dataOwner}, #{securityOwner}, #{accessUrl},
-            #{techStack}, #{resourceSummary}, #{networkSummary}, #{relationSummary}, #{createBy}, sysdate(), #{remark}
+            #{applicationCode}, #{applicationName}, #{applicationType}, #{classificationLevel}, #{constructionSource}, #{applicationStatus},
+            #{linkageStatus}, #{lastAlertTime}, #{projectId}, #{ownerOrg}, #{ownerDeptId}, #{ownerName}, #{opsOwner}, #{vendorName},
+            #{vendorOwner}, #{portalOwner}, #{resourceOwner}, #{dataOwner}, #{securityOwner}, #{accessUrl}, #{techStack}, #{resourceSummary},
+            #{networkSummary}, #{relationSummary}, #{deletedFlag}, #{createBy}, sysdate(), #{remark}
         )
     </insert>
 
@@ -53,10 +135,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applicationName != null">application_name = #{applicationName},</if>
             <if test="applicationType != null">application_type = #{applicationType},</if>
             <if test="classificationLevel != null">classification_level = #{classificationLevel},</if>
+            <if test="constructionSource != null">construction_source = #{constructionSource},</if>
             <if test="applicationStatus != null">application_status = #{applicationStatus},</if>
-            <if test="projectId != null">project_id = #{projectId},</if>
             <if test="ownerOrg != null">owner_org = #{ownerOrg},</if>
+            <if test="ownerDeptId != null">owner_dept_id = #{ownerDeptId},</if>
             <if test="ownerName != null">owner_name = #{ownerName},</if>
+            <if test="opsOwner != null">ops_owner = #{opsOwner},</if>
             <if test="vendorName != null">vendor_name = #{vendorName},</if>
             <if test="vendorOwner != null">vendor_owner = #{vendorOwner},</if>
             <if test="portalOwner != null">portal_owner = #{portalOwner},</if>
@@ -75,14 +159,460 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where application_id = #{applicationId}
     </update>
 
-    <delete id="deleteInfoApplicationById" parameterType="Long">
-        delete from inf_application where application_id = #{applicationId}
+    <update id="deleteInfoApplicationById" parameterType="Long">
+        update inf_application
+           set deleted_flag = '1',
+               update_time = sysdate()
+         where application_id = #{applicationId}
+           and deleted_flag = '0'
+    </update>
+
+    <update id="deleteInfoApplicationByIds" parameterType="Long">
+        update inf_application
+           set deleted_flag = '1',
+               update_time = sysdate()
+         where application_id in
+         <foreach collection="array" item="applicationId" open="(" separator="," close=")">
+            #{applicationId}
+         </foreach>
+           and deleted_flag = '0'
+    </update>
+
+    <select id="countInfoApplicationCode" resultType="int">
+        select count(1)
+          from inf_application
+         where application_code = #{applicationCode}
+           and deleted_flag = '0'
+           <if test="excludeApplicationId != null">
+             and application_id != #{excludeApplicationId}
+           </if>
+    </select>
+
+    <select id="existsInfoProjectById" parameterType="Long" resultType="int">
+        select count(1) from inf_project where project_id = #{projectId}
+    </select>
+
+    <select id="existsInfoResourceById" parameterType="Long" resultType="int">
+        select count(1) from inf_resource where resource_id = #{resourceId}
+    </select>
+
+    <select id="existsInfoNetworkById" parameterType="Long" resultType="int">
+        select count(1) from inf_network_resource where network_id = #{networkId}
+    </select>
+
+    <select id="existsInfoApplicationById" parameterType="Long" resultType="int">
+        select count(1) from inf_application where application_id = #{applicationId} and deleted_flag = '0'
+    </select>
+
+    <select id="selectInfoApplicationProjectRelList" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplicationProjectRel">
+        select r.rel_id as relId, r.application_id as applicationId, r.project_id as projectId,
+               p.project_code as projectCode, p.project_name as projectName, r.relation_type as relationType,
+               r.active_flag as activeFlag, r.create_by as createBy, r.create_time as createTime,
+               r.update_by as updateBy, r.update_time as updateTime, r.remark
+          from inf_application_project_rel r
+          left join inf_project p on r.project_id = p.project_id
+         where r.application_id = #{applicationId}
+         order by case when r.relation_type = 'PRIMARY' then 0 else 1 end, r.rel_id desc
+    </select>
+
+    <select id="selectInfoApplicationProjectRelById" resultType="com.ruoyi.system.domain.information.InfoApplicationProjectRel">
+        select r.rel_id as relId, r.application_id as applicationId, r.project_id as projectId,
+               p.project_code as projectCode, p.project_name as projectName, r.relation_type as relationType,
+               r.active_flag as activeFlag, r.create_by as createBy, r.create_time as createTime,
+               r.update_by as updateBy, r.update_time as updateTime, r.remark
+          from inf_application_project_rel r
+          left join inf_project p on r.project_id = p.project_id
+         where r.application_id = #{applicationId}
+           and r.rel_id = #{relId}
+         limit 1
+    </select>
+
+    <select id="selectInfoApplicationProjectRelByProject" resultType="com.ruoyi.system.domain.information.InfoApplicationProjectRel">
+        select r.rel_id as relId, r.application_id as applicationId, r.project_id as projectId,
+               p.project_code as projectCode, p.project_name as projectName, r.relation_type as relationType,
+               r.active_flag as activeFlag, r.create_by as createBy, r.create_time as createTime,
+               r.update_by as updateBy, r.update_time as updateTime, r.remark
+          from inf_application_project_rel r
+          left join inf_project p on r.project_id = p.project_id
+         where r.application_id = #{applicationId}
+           and r.project_id = #{projectId}
+         limit 1
+    </select>
+
+    <select id="selectPrimaryInfoApplicationProjectRel" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplicationProjectRel">
+        select r.rel_id as relId, r.application_id as applicationId, r.project_id as projectId,
+               p.project_code as projectCode, p.project_name as projectName, r.relation_type as relationType,
+               r.active_flag as activeFlag, r.create_by as createBy, r.create_time as createTime,
+               r.update_by as updateBy, r.update_time as updateTime, r.remark
+          from inf_application_project_rel r
+          left join inf_project p on r.project_id = p.project_id
+         where r.application_id = #{applicationId}
+           and r.relation_type = 'PRIMARY'
+           and r.active_flag = '1'
+         limit 1
+    </select>
+
+    <insert id="insertInfoApplicationProjectRel" parameterType="com.ruoyi.system.domain.information.InfoApplicationProjectRel" useGeneratedKeys="true" keyProperty="relId">
+        insert into inf_application_project_rel (
+            application_id, project_id, relation_type, active_flag, create_by, create_time, remark
+        ) values (
+            #{applicationId}, #{projectId}, #{relationType}, #{activeFlag}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoApplicationProjectRel" parameterType="com.ruoyi.system.domain.information.InfoApplicationProjectRel">
+        update inf_application_project_rel
+        <set>
+            <if test="projectId != null">project_id = #{projectId},</if>
+            <if test="relationType != null">relation_type = #{relationType},</if>
+            <if test="activeFlag != null">active_flag = #{activeFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where rel_id = #{relId}
+    </update>
+
+    <update id="clearPrimaryInfoApplicationProjectRel">
+        update inf_application_project_rel
+           set relation_type = 'RELATED',
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where application_id = #{applicationId}
+           and relation_type = 'PRIMARY'
+    </update>
+
+    <delete id="deleteInfoApplicationProjectRel">
+        delete from inf_application_project_rel
+         where application_id = #{applicationId}
+           and rel_id = #{relId}
     </delete>
 
-    <delete id="deleteInfoApplicationByIds" parameterType="Long">
-        delete from inf_application where application_id in
-        <foreach collection="array" item="applicationId" open="(" separator="," close=")">
-            #{applicationId}
-        </foreach>
+    <update id="updateInfoApplicationProjectId">
+        update inf_application
+           set project_id = #{projectId},
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where application_id = #{applicationId}
+    </update>
+
+    <select id="countInfoApplicationProjectRel" parameterType="Long" resultType="int">
+        select count(1) from inf_application_project_rel where application_id = #{applicationId} and active_flag = '1'
+    </select>
+
+    <select id="selectInfoApplicationDependencyRelList" parameterType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel" resultType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel">
+        select d.dependency_id as dependencyId,
+               d.application_id as applicationId,
+               d.dependency_type as dependencyType,
+               d.target_id as targetId,
+               d.target_code as targetCode,
+               d.target_name as targetName,
+               d.target_source as targetSource,
+               d.target_key as targetKey,
+               d.dependency_direction as dependencyDirection,
+               d.dependency_role as dependencyRole,
+               d.importance_level as importanceLevel,
+               d.status_link_enabled as statusLinkEnabled,
+               d.alert_link_enabled as alertLinkEnabled,
+               d.dependency_status as dependencyStatus,
+               <include refid="dependencyRuntimeStatusExpr"/> as runtimeStatus,
+               d.last_sync_time as lastSyncTime,
+               d.target_snapshot_json as targetSnapshotJson,
+               d.create_by as createBy,
+               d.create_time as createTime,
+               d.update_by as updateBy,
+               d.update_time as updateTime,
+               d.remark
+          from inf_application_dependency_rel d
+          left join inf_resource r on d.dependency_type = 'RESOURCE' and d.target_id = r.resource_id
+          left join inf_network_resource n on d.dependency_type = 'NETWORK' and d.target_id = n.network_id
+          left join inf_project p on d.dependency_type = 'PROJECT' and d.target_id = p.project_id
+          left join inf_application app on d.dependency_type = 'APPLICATION' and d.target_id = app.application_id and app.deleted_flag = '0'
+         where d.application_id = #{applicationId}
+           <if test="dependencyType != null and dependencyType != ''">and d.dependency_type = #{dependencyType}</if>
+           <if test="targetName != null and targetName != ''">and d.target_name like concat('%', #{targetName}, '%')</if>
+           <if test="importanceLevel != null and importanceLevel != ''">and d.importance_level = #{importanceLevel}</if>
+         order by field(d.importance_level, 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'), d.dependency_id desc
+    </select>
+
+    <select id="selectInfoApplicationDependencyRelById" resultType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel">
+        select d.dependency_id as dependencyId,
+               d.application_id as applicationId,
+               d.dependency_type as dependencyType,
+               d.target_id as targetId,
+               d.target_code as targetCode,
+               d.target_name as targetName,
+               d.target_source as targetSource,
+               d.target_key as targetKey,
+               d.dependency_direction as dependencyDirection,
+               d.dependency_role as dependencyRole,
+               d.importance_level as importanceLevel,
+               d.status_link_enabled as statusLinkEnabled,
+               d.alert_link_enabled as alertLinkEnabled,
+               d.dependency_status as dependencyStatus,
+               <include refid="dependencyRuntimeStatusExpr"/> as runtimeStatus,
+               d.last_sync_time as lastSyncTime,
+               d.target_snapshot_json as targetSnapshotJson,
+               d.create_by as createBy,
+               d.create_time as createTime,
+               d.update_by as updateBy,
+               d.update_time as updateTime,
+               d.remark
+          from inf_application_dependency_rel d
+          left join inf_resource r on d.dependency_type = 'RESOURCE' and d.target_id = r.resource_id
+          left join inf_network_resource n on d.dependency_type = 'NETWORK' and d.target_id = n.network_id
+          left join inf_project p on d.dependency_type = 'PROJECT' and d.target_id = p.project_id
+          left join inf_application app on d.dependency_type = 'APPLICATION' and d.target_id = app.application_id and app.deleted_flag = '0'
+         where d.application_id = #{applicationId}
+           and d.dependency_id = #{dependencyId}
+         limit 1
+    </select>
+
+    <select id="countInfoApplicationDependencyRelDuplicate" parameterType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel" resultType="int">
+        select count(1)
+          from inf_application_dependency_rel d
+         where d.application_id = #{applicationId}
+           and d.dependency_type = #{dependencyType}
+           and (
+                (#{targetId} is not null and d.target_id = #{targetId})
+                or (#{targetId} is null and ifnull(#{targetKey}, '') != '' and ifnull(d.target_key, '') = ifnull(#{targetKey}, ''))
+                or (#{targetId} is null and ifnull(#{targetKey}, '') = '' and ifnull(d.target_id, -1) = -1 and ifnull(d.target_key, '') = '' and ifnull(d.target_name, '') = ifnull(#{targetName}, ''))
+           )
+           <if test="dependencyId != null">
+             and d.dependency_id != #{dependencyId}
+           </if>
+    </select>
+
+    <insert id="insertInfoApplicationDependencyRel" parameterType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel" useGeneratedKeys="true" keyProperty="dependencyId">
+        insert into inf_application_dependency_rel (
+            application_id, dependency_type, target_id, target_code, target_name, target_source, target_key,
+            dependency_direction, dependency_role, importance_level, status_link_enabled, alert_link_enabled,
+            dependency_status, last_sync_time, target_snapshot_json, create_by, create_time, remark
+        ) values (
+            #{applicationId}, #{dependencyType}, #{targetId}, #{targetCode}, #{targetName}, #{targetSource}, #{targetKey},
+            #{dependencyDirection}, #{dependencyRole}, #{importanceLevel}, #{statusLinkEnabled}, #{alertLinkEnabled},
+            #{dependencyStatus}, #{lastSyncTime}, #{targetSnapshotJson}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoApplicationDependencyRel" parameterType="com.ruoyi.system.domain.information.InfoApplicationDependencyRel">
+        update inf_application_dependency_rel
+        <set>
+            <if test="dependencyType != null">dependency_type = #{dependencyType},</if>
+            target_id = #{targetId},
+            <if test="targetCode != null">target_code = #{targetCode},</if>
+            <if test="targetName != null">target_name = #{targetName},</if>
+            <if test="targetSource != null">target_source = #{targetSource},</if>
+            <if test="targetKey != null">target_key = #{targetKey},</if>
+            <if test="dependencyDirection != null">dependency_direction = #{dependencyDirection},</if>
+            <if test="dependencyRole != null">dependency_role = #{dependencyRole},</if>
+            <if test="importanceLevel != null">importance_level = #{importanceLevel},</if>
+            <if test="statusLinkEnabled != null">status_link_enabled = #{statusLinkEnabled},</if>
+            <if test="alertLinkEnabled != null">alert_link_enabled = #{alertLinkEnabled},</if>
+            <if test="dependencyStatus != null">dependency_status = #{dependencyStatus},</if>
+            <if test="lastSyncTime != null">last_sync_time = #{lastSyncTime},</if>
+            <if test="targetSnapshotJson != null">target_snapshot_json = #{targetSnapshotJson},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where dependency_id = #{dependencyId}
+          and application_id = #{applicationId}
+    </update>
+
+    <delete id="deleteInfoApplicationDependencyRel">
+        delete from inf_application_dependency_rel
+         where application_id = #{applicationId}
+           and dependency_id = #{dependencyId}
     </delete>
+
+    <select id="countInfoApplicationDependencyRel" parameterType="Long" resultType="int">
+        select count(1) from inf_application_dependency_rel where application_id = #{applicationId}
+    </select>
+
+    <select id="selectInfoApplicationAlertEventList" parameterType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent" resultType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent">
+        select alert_id as alertId, application_id as applicationId, source_type as sourceType, source_object_type as sourceObjectType,
+               source_object_id as sourceObjectId, event_code as eventCode, event_title as eventTitle, event_level as eventLevel,
+               event_status as eventStatus, impact_summary as impactSummary, event_time as eventTime, ack_time as ackTime,
+               resolved_time as resolvedTime, handler_name as handlerName, payload_json as payloadJson,
+               create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark
+          from inf_application_alert_event
+         where application_id = #{applicationId}
+           <if test="eventStatus != null and eventStatus != ''">and event_status = #{eventStatus}</if>
+           <if test="eventLevel != null and eventLevel != ''">and event_level = #{eventLevel}</if>
+         order by event_time desc, alert_id desc
+    </select>
+
+    <select id="selectInfoApplicationAlertEventById" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent">
+        select alert_id as alertId, application_id as applicationId, source_type as sourceType, source_object_type as sourceObjectType,
+               source_object_id as sourceObjectId, event_code as eventCode, event_title as eventTitle, event_level as eventLevel,
+               event_status as eventStatus, impact_summary as impactSummary, event_time as eventTime, ack_time as ackTime,
+               resolved_time as resolvedTime, handler_name as handlerName, payload_json as payloadJson,
+               create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark
+          from inf_application_alert_event
+         where alert_id = #{alertId}
+         limit 1
+    </select>
+
+    <insert id="insertInfoApplicationAlertEvent" parameterType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent" useGeneratedKeys="true" keyProperty="alertId">
+        insert into inf_application_alert_event (
+            application_id, source_type, source_object_type, source_object_id, event_code, event_title, event_level,
+            event_status, impact_summary, event_time, ack_time, resolved_time, handler_name, payload_json, create_by, create_time, remark
+        ) values (
+            #{applicationId}, #{sourceType}, #{sourceObjectType}, #{sourceObjectId}, #{eventCode}, #{eventTitle}, #{eventLevel},
+            #{eventStatus}, #{impactSummary}, #{eventTime}, #{ackTime}, #{resolvedTime}, #{handlerName}, #{payloadJson}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoApplicationAlertEvent" parameterType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent">
+        update inf_application_alert_event
+        <set>
+            <if test="sourceType != null">source_type = #{sourceType},</if>
+            <if test="sourceObjectType != null">source_object_type = #{sourceObjectType},</if>
+            <if test="sourceObjectId != null">source_object_id = #{sourceObjectId},</if>
+            <if test="eventCode != null">event_code = #{eventCode},</if>
+            <if test="eventTitle != null">event_title = #{eventTitle},</if>
+            <if test="eventLevel != null">event_level = #{eventLevel},</if>
+            <if test="eventStatus != null">event_status = #{eventStatus},</if>
+            <if test="impactSummary != null">impact_summary = #{impactSummary},</if>
+            <if test="eventTime != null">event_time = #{eventTime},</if>
+            <if test="ackTime != null">ack_time = #{ackTime},</if>
+            <if test="resolvedTime != null">resolved_time = #{resolvedTime},</if>
+            <if test="handlerName != null">handler_name = #{handlerName},</if>
+            <if test="payloadJson != null">payload_json = #{payloadJson},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            update_by = #{updateBy},
+            update_time = sysdate()
+        </set>
+        where alert_id = #{alertId}
+    </update>
+
+    <select id="countOpenInfoApplicationAlert" resultType="int">
+        select count(1)
+          from inf_application_alert_event
+         where application_id = #{applicationId}
+           and event_status in ('OPEN', 'ACKED')
+           <if test="eventCode != null and eventCode != ''">
+             and event_code = #{eventCode}
+           </if>
+    </select>
+
+    <select id="countOpenInfoApplicationAlertByAppId" parameterType="Long" resultType="int">
+        select count(1)
+          from inf_application_alert_event
+         where application_id = #{applicationId}
+           and event_status in ('OPEN', 'ACKED')
+    </select>
+
+    <select id="selectLatestInfoApplicationAlertByAppId" parameterType="Long" resultType="com.ruoyi.system.domain.information.InfoApplicationAlertEvent">
+        select alert_id as alertId, application_id as applicationId, source_type as sourceType, source_object_type as sourceObjectType,
+               source_object_id as sourceObjectId, event_code as eventCode, event_title as eventTitle, event_level as eventLevel,
+               event_status as eventStatus, impact_summary as impactSummary, event_time as eventTime, ack_time as ackTime,
+               resolved_time as resolvedTime, handler_name as handlerName, payload_json as payloadJson,
+               create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark
+          from inf_application_alert_event
+         where application_id = #{applicationId}
+         order by event_time desc, alert_id desc
+         limit 1
+    </select>
+
+    <select id="selectInfoApplicationNoticeLogList" parameterType="com.ruoyi.system.domain.information.InfoApplicationNoticeLog" resultType="com.ruoyi.system.domain.information.InfoApplicationNoticeLog">
+        select notice_id as noticeId, alert_id as alertId, application_id as applicationId, receiver_name as receiverName,
+               receiver_role as receiverRole, channel_type as channelType, send_status as sendStatus, biz_status as bizStatus,
+               sent_time as sentTime, read_time as readTime, processed_time as processedTime, content_summary as contentSummary,
+               create_by as createBy, create_time as createTime, update_by as updateBy, update_time as updateTime, remark
+          from inf_application_notice_log
+         where application_id = #{applicationId}
+           <if test="bizStatus != null and bizStatus != ''">and biz_status = #{bizStatus}</if>
+           <if test="receiverName != null and receiverName != ''">and receiver_name like concat('%', #{receiverName}, '%')</if>
+         order by sent_time desc, notice_id desc
+    </select>
+
+    <insert id="insertInfoApplicationNoticeLog" parameterType="com.ruoyi.system.domain.information.InfoApplicationNoticeLog" useGeneratedKeys="true" keyProperty="noticeId">
+        insert into inf_application_notice_log (
+            alert_id, application_id, receiver_name, receiver_role, channel_type, send_status, biz_status,
+            sent_time, read_time, processed_time, content_summary, create_by, create_time, remark
+        ) values (
+            #{alertId}, #{applicationId}, #{receiverName}, #{receiverRole}, #{channelType}, #{sendStatus}, #{bizStatus},
+            #{sentTime}, #{readTime}, #{processedTime}, #{contentSummary}, #{createBy}, sysdate(), #{remark}
+        )
+    </insert>
+
+    <update id="updateInfoApplicationNoticeAckByAlertId">
+        update inf_application_notice_log
+           set biz_status = 'PROCESSING',
+               read_time = ifnull(read_time, sysdate()),
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where alert_id = #{alertId}
+           and biz_status in ('UNREAD', 'READ')
+    </update>
+
+    <update id="updateInfoApplicationNoticeResolvedByAlertId">
+        update inf_application_notice_log
+           set biz_status = 'DONE',
+               processed_time = ifnull(processed_time, sysdate()),
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where alert_id = #{alertId}
+           and biz_status != 'DONE'
+    </update>
+
+    <update id="updateInfoApplicationLinkageStatus">
+        update inf_application
+           set linkage_status = #{linkageStatus},
+               last_alert_time = #{lastAlertTime},
+               update_by = #{updateBy},
+               update_time = sysdate()
+         where application_id = #{applicationId}
+    </update>
+
+    <select id="selectInfoApplicationDependencyTypeSummary" parameterType="Long" resultType="java.util.HashMap">
+        select d.dependency_type as dependencyType,
+               count(1) as totalCount,
+               sum(case when d.status_link_enabled = '1' and <include refid="dependencyRuntimeStatusExpr"/> in ('RISK', 'BLOCKED', 'WARNING', 'CRITICAL', 'ABNORMAL') then 1 else 0 end) as abnormalCount,
+               sum(case when d.status_link_enabled = '1' then 1 else 0 end) as statusLinkEnabledCount,
+               sum(case when d.alert_link_enabled = '1' then 1 else 0 end) as alertLinkEnabledCount
+          from inf_application_dependency_rel d
+          left join inf_resource r on d.dependency_type = 'RESOURCE' and d.target_id = r.resource_id
+          left join inf_network_resource n on d.dependency_type = 'NETWORK' and d.target_id = n.network_id
+          left join inf_project p on d.dependency_type = 'PROJECT' and d.target_id = p.project_id
+          left join inf_application app on d.dependency_type = 'APPLICATION' and d.target_id = app.application_id and app.deleted_flag = '0'
+         where d.application_id = #{applicationId}
+         group by d.dependency_type
+         order by totalCount desc, d.dependency_type asc
+    </select>
+
+    <select id="selectInfoApplicationRuntimeStatusList" parameterType="Long" resultType="java.util.HashMap">
+        select d.dependency_id as dependencyId,
+               d.dependency_type as dependencyType,
+               d.target_id as targetId,
+               d.target_code as targetCode,
+               d.target_name as targetName,
+               d.target_source as targetSource,
+               d.dependency_direction as dependencyDirection,
+               d.dependency_role as dependencyRole,
+               d.importance_level as importanceLevel,
+               d.status_link_enabled as statusLinkEnabled,
+               d.alert_link_enabled as alertLinkEnabled,
+               d.dependency_status as dependencyStatus,
+               <include refid="dependencyRuntimeStatusExpr"/> as runtimeStatus,
+               case
+                   when d.dependency_type = 'RESOURCE' then concat(ifnull(r.resource_status, 'UNKNOWN'), '/', ifnull(r.monitor_status, 'UNKNOWN'))
+                   when d.dependency_type = 'NETWORK' then concat(ifnull(n.resource_status, 'UNKNOWN'), '/', ifnull(n.security_status, 'UNKNOWN'))
+                   when d.dependency_type = 'PROJECT' then ifnull(p.project_status, 'UNKNOWN')
+                   when d.dependency_type = 'APPLICATION' then concat(ifnull(app.application_status, 'UNKNOWN'), '/', ifnull(app.linkage_status, 'UNKNOWN'))
+                   else ifnull(d.dependency_status, 'UNKNOWN')
+               end as targetStatus,
+               d.last_sync_time as lastSyncTime,
+               d.remark as remark
+          from inf_application_dependency_rel d
+          left join inf_resource r on d.dependency_type = 'RESOURCE' and d.target_id = r.resource_id
+          left join inf_network_resource n on d.dependency_type = 'NETWORK' and d.target_id = n.network_id
+          left join inf_project p on d.dependency_type = 'PROJECT' and d.target_id = p.project_id
+          left join inf_application app on d.dependency_type = 'APPLICATION' and d.target_id = app.application_id and app.deleted_flag = '0'
+         where d.application_id = #{applicationId}
+         order by field(d.importance_level, 'CRITICAL', 'HIGH', 'MEDIUM', 'LOW'), d.dependency_id desc
+    </select>
+
 </mapper>

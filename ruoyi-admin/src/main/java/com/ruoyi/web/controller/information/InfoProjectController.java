@@ -18,10 +18,18 @@ import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.system.domain.information.InfoApproveBody;
 import com.ruoyi.system.domain.information.InfoExecuteBody;
+import com.ruoyi.system.domain.information.InfoProjectDocument;
+import com.ruoyi.system.domain.information.InfoProjectDocumentArchiveBody;
+import com.ruoyi.system.domain.information.InfoProjectDocumentComplianceBody;
 import com.ruoyi.system.domain.information.InfoProject;
+import com.ruoyi.system.domain.information.InfoProjectPermissionRel;
+import com.ruoyi.system.domain.information.InfoProjectSpaceDirectory;
 import com.ruoyi.system.domain.information.InfoProjectTemplate;
 import com.ruoyi.system.domain.information.InfoWorkOrder;
+import com.ruoyi.system.service.information.IInfoProjectDocumentService;
+import com.ruoyi.system.service.information.IInfoProjectPermissionService;
 import com.ruoyi.system.service.information.IInfoProjectService;
+import com.ruoyi.system.service.information.IInfoProjectSpaceDirectoryService;
 import com.ruoyi.system.service.information.IInfoWorkOrderService;
 
 @RestController
@@ -33,6 +41,15 @@ public class InfoProjectController extends BaseController
 
     @Autowired
     private IInfoWorkOrderService workOrderService;
+
+    @Autowired
+    private IInfoProjectPermissionService projectPermissionService;
+
+    @Autowired
+    private IInfoProjectSpaceDirectoryService projectSpaceDirectoryService;
+
+    @Autowired
+    private IInfoProjectDocumentService projectDocumentService;
 
     @PreAuthorize("@ss.hasPermi('information:project:list')")
     @GetMapping("/list")
@@ -48,6 +65,13 @@ public class InfoProjectController extends BaseController
     public AjaxResult getInfo(@PathVariable Long projectId)
     {
         return success(projectService.selectInfoProjectById(projectId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:detail')")
+    @GetMapping("/{projectId}/detail")
+    public AjaxResult detail(@PathVariable Long projectId)
+    {
+        return success(projectService.selectProjectDetail(projectId));
     }
 
     @PreAuthorize("@ss.hasPermi('information:project:add')")
@@ -119,6 +143,7 @@ public class InfoProjectController extends BaseController
     public TableDataInfo orderList(InfoWorkOrder workOrder)
     {
         workOrder.setDomainType("PROJECT");
+        workOrder.setRequestType("ACCEPTANCE");
         startPage();
         return getDataTable(workOrderService.selectInfoWorkOrderList(workOrder));
     }
@@ -128,6 +153,7 @@ public class InfoProjectController extends BaseController
     public AjaxResult addOrder(@RequestBody InfoWorkOrder workOrder)
     {
         workOrder.setDomainType("PROJECT");
+        workOrder.setRequestType("ACCEPTANCE");
         workOrder.setCreateBy(getUsername());
         return toAjax(workOrderService.insertInfoWorkOrder(workOrder));
     }
@@ -137,6 +163,7 @@ public class InfoProjectController extends BaseController
     public AjaxResult editOrder(@RequestBody InfoWorkOrder workOrder)
     {
         workOrder.setDomainType("PROJECT");
+        workOrder.setRequestType("ACCEPTANCE");
         workOrder.setUpdateBy(getUsername());
         return toAjax(workOrderService.updateInfoWorkOrder(workOrder));
     }
@@ -153,5 +180,103 @@ public class InfoProjectController extends BaseController
     public AjaxResult execute(@PathVariable Long workOrderId, @RequestBody InfoExecuteBody body)
     {
         return toAjax(workOrderService.executeInfoWorkOrder(workOrderId, body));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:permission')")
+    @GetMapping("/{projectId}/permissions")
+    public AjaxResult listPermissions(@PathVariable Long projectId, InfoProjectPermissionRel permission)
+    {
+        permission.setProjectId(projectId);
+        return success(projectPermissionService.selectInfoProjectPermissionList(permission));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:permission')")
+    @PostMapping("/{projectId}/permissions")
+    public AjaxResult addPermission(@PathVariable Long projectId, @RequestBody InfoProjectPermissionRel permission)
+    {
+        permission.setProjectId(projectId);
+        permission.setCreateBy(getUsername());
+        return toAjax(projectPermissionService.insertProjectPermission(permission));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:permission')")
+    @PutMapping("/{projectId}/permissions/{permissionId}")
+    public AjaxResult editPermission(@PathVariable Long projectId, @PathVariable Long permissionId,
+        @RequestBody InfoProjectPermissionRel permission)
+    {
+        permission.setProjectId(projectId);
+        permission.setPermissionId(permissionId);
+        permission.setUpdateBy(getUsername());
+        return toAjax(projectPermissionService.updateProjectPermission(permission));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:permission')")
+    @DeleteMapping("/{projectId}/permissions/{permissionId}")
+    public AjaxResult removePermission(@PathVariable Long projectId, @PathVariable Long permissionId)
+    {
+        return toAjax(projectPermissionService.deleteProjectPermission(projectId, permissionId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:permission')")
+    @GetMapping("/{projectId}/permission-matrix")
+    public AjaxResult permissionMatrix(@PathVariable Long projectId)
+    {
+        return success(projectPermissionService.selectProjectPermissionMatrix(projectId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:space')")
+    @GetMapping("/{projectId}/space/directories")
+    public AjaxResult listSpaceDirectories(@PathVariable Long projectId)
+    {
+        return success(projectSpaceDirectoryService.selectInfoProjectSpaceDirectoryList(projectId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:space')")
+    @PostMapping("/{projectId}/space/init")
+    public AjaxResult initProjectSpace(@PathVariable Long projectId)
+    {
+        return toAjax(projectSpaceDirectoryService.initProjectSpace(projectId, getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:space')")
+    @PostMapping("/{projectId}/space/directories/custom")
+    public AjaxResult addCustomDirectory(@PathVariable Long projectId, @RequestBody InfoProjectSpaceDirectory directory)
+    {
+        directory.setCreateBy(getUsername());
+        return toAjax(projectSpaceDirectoryService.insertCustomDirectory(projectId, directory));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:document')")
+    @GetMapping("/{projectId}/documents")
+    public AjaxResult listDocuments(@PathVariable Long projectId)
+    {
+        return success(projectDocumentService.selectInfoProjectDocumentList(projectId));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:document')")
+    @PostMapping("/{projectId}/documents")
+    public AjaxResult addDocument(@PathVariable Long projectId, @RequestBody InfoProjectDocument document)
+    {
+        document.setCreateBy(getUsername());
+        return toAjax(projectDocumentService.insertProjectDocument(projectId, document));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:document')")
+    @PostMapping("/documents/{documentId}/compliance")
+    public AjaxResult updateDocumentCompliance(@PathVariable Long documentId,
+        @RequestBody InfoProjectDocumentComplianceBody body)
+    {
+        return toAjax(projectDocumentService.updateDocumentCompliance(documentId,
+            body == null ? null : body.getComplianceStatus(),
+            body == null ? null : body.getCheckComment(),
+            getUsername()));
+    }
+
+    @PreAuthorize("@ss.hasPermi('information:project:document')")
+    @PostMapping("/documents/{documentId}/archive")
+    public AjaxResult archiveDocument(@PathVariable Long documentId, @RequestBody InfoProjectDocumentArchiveBody body)
+    {
+        return toAjax(projectDocumentService.archiveDocument(documentId, body == null ? null : body.getArchiveStatus(),
+            getUsername()));
     }
 }

@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.information;
 
 import java.util.List;
+import java.util.Map;
 import com.ruoyi.system.domain.information.InfoProject;
 import com.ruoyi.system.domain.information.InfoProjectTemplate;
 
@@ -9,6 +10,8 @@ public interface IInfoProjectService
     InfoProject selectInfoProjectById(Long projectId);
 
     List<InfoProject> selectInfoProjectList(InfoProject project);
+
+    Map<String, Object> selectProjectDetail(Long projectId);
 
     int insertInfoProject(InfoProject project);
 
